@@ -1,37 +1,76 @@
-import datetime
-import json
-
-from cloudshell.networking.apply_connectivity.apply_connectivity_operation import apply_connectivity_changes
-from cloudshell.networking.apply_connectivity.models.connectivity_result import ConnectivitySuccessResponse
-from cloudshell.shell.core.interfaces.save_restore import OrchestrationSaveResult, OrchestrationSavedArtifact, \
-    OrchestrationSavedArtifactInfo, OrchestrationRestoreRules
+from cloudshell.core.context.error_handling_context import ErrorHandlingContext
+from cloudshell.devices.driver_helper import get_logger_with_thread_id, get_cli, get_api, parse_custom_commands
+from cloudshell.devices.standards.networking.configuration_attributes_structure import \
+    create_networking_resource_from_context
+from cloudshell.shell.core.driver_utils import GlobalLock
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
-from cloudshell.shell.core.driver_context import InitCommandContext, ResourceCommandContext, AutoLoadResource, \
-    AutoLoadAttribute, AutoLoadDetails, CancellationContext
+from cloudshell.devices.runners.state_runner import StateRunner
+from cloudshell.devices.runners.run_command_runner import RunCommandRunner
+
+from package.cloudshell.networking.cumulus.cli.handler import CumulusCliHandler
+from package.cloudshell.networking.cumulus.runners.autoload import CumulusLinuxAutoloadRunner
+from package.cloudshell.networking.cumulus.snmp.handler import CumulusLinuxSnmpHandler
 
 
-#from data_model import *  # run 'shellfoundry generate' to generate data model classes
+class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
 
-class CumulusLinuxSwitchShell2GDriver (ResourceDriverInterface):
+    SUPPORTED_OS = [r"Cumulus"]
+    SHELL_NAME = "Cumulus Linux Switch 2G"
 
     def __init__(self):
-        """
-        ctor must be without arguments, it is created with reflection at run time
-        """
-        pass
+        """"""
+        super(CumulusLinuxSwitchShell2GDriver, self).__init__()
+        self._cli = None
 
     def initialize(self, context):
-        """
-        Initialize the driver session, this function is called everytime a new instance of the driver is created
-        This is a good place to load and cache the driver configuration, initiate sessions etc.
-        :param InitCommandContext context: the context the command runs on
-        """
-        pass
+        """Initialize the driver session
 
-    # <editor-fold desc="Networking Standard Commands">
-    def restore(self, context, cancellation_context, path, configuration_type, restore_method, vrf_management_name):
+        :param cloudshell.shell.core.driver_context.InitCommandContext context: the context the command runs on
         """
-        Restores a configuration file
+        resource_config = create_networking_resource_from_context(self.SHELL_NAME, self.SUPPORTED_OS, context)
+        session_pool_size = int(resource_config.sessions_concurrency_limit)
+        self._cli = get_cli(session_pool_size)
+
+        return 'Finished initializing'
+
+    @GlobalLock.lock
+    def get_inventory(self, context):
+        """Return device structure with all standard attributes
+
+        :param ResourceCommandContext context: ResourceCommandContext object with all Resource Attributes inside
+        :return: response
+        :rtype: str
+        """
+        logger = get_logger_with_thread_id(context)
+        logger.info('Autoload command started')
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
+            snmp_handler = CumulusLinuxSnmpHandler(resource_config, logger, api, cli_handler)
+
+            autoload_operations = CumulusLinuxAutoloadRunner(logger=logger,
+                                                             resource_config=resource_config,
+                                                             snmp_handler=snmp_handler)
+
+            logger.info('Autoload started')
+            response = autoload_operations.discover()
+            logger.info('Autoload completed')
+
+            return response
+
+    def restore(self, context, cancellation_context, path, configuration_type, restore_method, vrf_management_name):
+        """Restores a configuration file
+
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
         :param str path: The path to the configuration file, including the configuration file name.
@@ -42,8 +81,8 @@ class CumulusLinuxSwitchShell2GDriver (ResourceDriverInterface):
         pass
 
     def save(self, context, cancellation_context, folder_path, configuration_type, vrf_management_name):
-        """
-        Creates a configuration file and saves it to the provided destination
+        """Creates a configuration file and saves it to the provided destination
+
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
         :param str configuration_type: Specify whether the file should update the startup or running config. Value can one
@@ -55,8 +94,8 @@ class CumulusLinuxSwitchShell2GDriver (ResourceDriverInterface):
         pass
 
     def load_firmware(self, context, cancellation_context, path, vrf_management_name):
-        """
-        Upload and updates firmware on the resource
+        """Upload and updates firmware on the resource
+
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param str path: path to tftp server where firmware file is stored
         :param str vrf_management_name: Optional. Virtual routing and Forwarding management name
@@ -64,41 +103,82 @@ class CumulusLinuxSwitchShell2GDriver (ResourceDriverInterface):
         pass
 
     def run_custom_command(self, context, cancellation_context, custom_command):
-        """
-        Executes a custom command on the device
+        """Executes a custom command on the device
+
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
         :param str custom_command: The command to run. Note that commands that require a response are not supported.
         :return: the command result text
         :rtype: str
         """
-        pass
+        logger = get_logger_with_thread_id(context)
+        logger.info('Run Custom command started')
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
+            send_command_operations = RunCommandRunner(logger=logger,
+                                                       cli_handler=cli_handler)
+
+            response = send_command_operations.run_custom_command(custom_command=parse_custom_commands(custom_command))
+            logger.info('Run Custom command ended with response: {}'.format(response))
+
+            return response
 
     def run_custom_config_command(self, context, cancellation_context, custom_command):
-        """
-        Executes a custom command on the device in configuration mode
+        """Executes a custom command on the device in configuration mode
+
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
         :param str custom_command: The command to run. Note that commands that require a response are not supported.
         :return: the command result text
         :rtype: str
         """
-        pass
+        logger = get_logger_with_thread_id(context)
+        logger.info('Run Custom Config command started')
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
+            send_command_operations = RunCommandRunner(logger=logger,
+                                                       cli_handler=cli_handler)
+
+            response = send_command_operations.run_custom_config_command(
+                custom_command=parse_custom_commands(custom_command))
+
+            logger.info('Run Custom Config command ended with response: {}'.format(response))
+
+            return response
 
     def shutdown(self, context, cancellation_context):
-        """
-        Sends a graceful shutdown to the device
+        """Sends a graceful shutdown to the device
+
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
         """
         pass
 
-    # </editor-fold>
-
-    # <editor-fold desc="Orchestration Save and Restore Standard">
     def orchestration_save(self, context, cancellation_context, mode, custom_params):
-        """
-        Saves the Shell state and returns a description of the saved artifacts and information
+        """Saves the Shell state and returns a description of the saved artifacts and information
+
         This command is intended for API use only by sandbox orchestration scripts to implement
         a save and restore workflow
         :param ResourceCommandContext context: the context object containing resource and reservation info
@@ -140,8 +220,8 @@ class CumulusLinuxSwitchShell2GDriver (ResourceDriverInterface):
         pass
 
     def orchestration_restore(self, context, cancellation_context, saved_artifact_info, custom_params):
-        """
-        Restores a saved artifact previously saved by this Shell driver using the orchestration_save function
+        """Restores a saved artifact previously saved by this Shell driver using the orchestration_save function
+
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
         :param str saved_artifact_info: A JSON string representing the state to restore including saved artifacts and info
@@ -170,87 +250,42 @@ class CumulusLinuxSwitchShell2GDriver (ResourceDriverInterface):
         '''
         pass
 
-    # </editor-fold>
+    def health_check(self, context):
+        """Performs device health check
 
-    # <editor-fold desc="Connectivity Provider Interface (Optional)">
-
-    '''
-    # The ApplyConnectivityChanges function is intended to be used for using switches as connectivity providers
-    # for other devices. If the Switch shell is intended to be used a DUT only there is no need to implement it
-
-    def ApplyConnectivityChanges(self, context, request):
-        """
-        Configures VLANs on multiple ports or port-channels
-        :param ResourceCommandContext context: The context object for the command with resource and reservation info
-        :param str request: A JSON object with the list of requested connectivity changes
-        :return: a json object with the list of connectivity changes which were carried out by the switch
+        :param ResourceCommandContext context: ResourceCommandContext object with all Resource Attributes inside
+        :return: Success or Error message
         :rtype: str
         """
 
-        return apply_connectivity_changes(request=request,
-                                          add_vlan_action=lambda x: ConnectivitySuccessResponse(x,'Success'),
-                                          remove_vlan_action=lambda x: ConnectivitySuccessResponse(x,'Success'))
+        logger = get_logger_with_thread_id(context)
+        logger.info('Health Check command started')
 
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
 
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
 
-    '''
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
 
-    # </editor-fold>
+            state_operations = StateRunner(logger=logger,
+                                           api=api,
+                                           resource_config=resource_config,
+                                           cli_handler=cli_handler)
 
-    # <editor-fold desc="Discovery">
+            result = state_operations.health_check()
+            logger.info('Health Check command ended with result: {}'.format(result))
 
-    def get_inventory(self, context):
-        """
-        Discovers the resource structure and attributes.
-        :param AutoLoadCommandContext context: the context the command runs on
-        :return Attribute and sub-resource information for the Shell resource you can return an AutoLoadDetails object
-        :rtype: AutoLoadDetails
-        """
-
-        # See below some example code demonstrating how to return the resource structure and attributes
-        # In real life, this code will be preceded by SNMP/other calls to the resource details and will not be static
-        # run 'shellfoundry generate' in order to create classes that represent your data model
-
-        '''
-        resource = Cumuluslinuxswitchshell2G.create_from_context(context)
-        resource.vendor = 'specify the shell vendor'
-        resource.model = 'specify the shell model'
-
-        chassis1 = GenericChassis('Chassis 1')
-        chassis1.model = 'WS-X4232-GB-RJ'
-        chassis1.serial_number = 'JAE053002JD'
-        resource.add_sub_resource('1', chassis1)
-
-        module1 = GenericModule('Module 1')
-        module1.model = 'WS-X5561-GB-AB'
-        module1.serial_number = 'TGA053972JD'
-        chassis1.add_sub_resource('1', module1)
-
-        port1 = GenericPort('Port 1')
-        port1.mac_address = 'fe80::e10c:f055:f7f1:bb7t16'
-        port1.ipv4_address = '192.168.10.7'
-        module1.add_sub_resource('1', port1)
-
-        return resource.create_autoload_details()
-        '''
-        return AutoLoadDetails([], [])
-
-    # </editor-fold>
-
-    # <editor-fold desc="Health Check">
-
-    def health_check(self,cancellation_context):
-        """
-        Checks if the device is up and connectable
-        :return: str: Success or fail message
-        """
-        pass
-
-    # </editor-fold>
+            return result
 
     def cleanup(self):
-        """
-        Destroy the driver session, this function is called everytime a driver instance is destroyed
+        """Destroy the driver session, this function is called everytime a driver instance is destroyed
+
         This is a good place to close any open sessions, finish writing to log files
         """
         pass
@@ -270,8 +305,10 @@ if __name__ == "__main__":
 
     context = ResourceCommandContext(*(None,) * 4)
     context.resource = ResourceContextDetails(*(None,) * 13)
-    context.resource.name = 'Cisco ACI EPG Structure'
-    context.resource.fullname = 'Cisco ACI EPG Structure'
+    context.resource.name = "Cumulus Linux Switch"
+    context.resource.fullname = "Cumulus Linux Switch"
+    context.resource.address = address
+    context.resource.family = "CS_Switch"
     context.reservation = ReservationContextDetails(*(None,) * 7)
     context.reservation.reservation_id = '0cc17f8c-75ba-495f-aeb5-df5f0f9a0e97'
     context.resource.attributes = {}
@@ -282,29 +319,32 @@ if __name__ == "__main__":
                         ("Enable SNMP", "False"),
                         ("Disable SNMP", "False"),
                         ("SNMP Read Community", "mynotsosecretpassword"),
+                        ("Sessions Concurrency Limit", 1),
+                        ("CLI Connection Type", "SSH"),
                         ("Password", password)]:
 
         context.resource.attributes["{}.{}".format(CumulusLinuxSwitchShell2GDriver.SHELL_NAME, attr)] = value
 
 
-    # context.resource.attributes['{}.User'] = user
-    # context.resource.attributes['Test User Password'] = ""
-    # context.resource.attributes['Password'] = password
-    # context.resource.attributes["CLI TCP Port"] = 22
-    # context.resource.attributes["CLI Connection Type"] = "ssh"
-    # context.resource.attributes["Sessions Concurrency Limit"] = 1
-    # context.resource.attributes["Test Files Location"] = "/home/anthony/Downloads/"
-    context.resource.address = address
-
     context.connectivity = mock.MagicMock()
-    context.connectivity.server_address = "192.168.85.24"
+    context.connectivity.server_address = "192.168.85.27"
 
     dr = CumulusLinuxSwitchShell2GDriver()
     dr.initialize(context)
 
-    with mock.patch('__main__.get_api') as get_api:
-        get_api.return_value = type('api', (object,), {
-            'DecryptPassword': lambda self, pw: type('Password', (object,), {'Value': pw})()})()
+    for res in  dr.get_inventory(context).resources:
+        print res.__dict__
 
-    out = dr.get_inventory(context)
+    # out = dr.health_check(context)
+    # out = dr.run_custom_command(context=context, cancellation_context=None, custom_command="help")
+    # out = dr.run_custom_config_command(context=context, cancellation_context=None, custom_command="helpso")
+
+
+    """
+    -bash: helpso: command not found
+    
+    cumulus@cumulus:~$ net cimmit
+    ERROR: Command not found.
+    
+    """
     print(out)
