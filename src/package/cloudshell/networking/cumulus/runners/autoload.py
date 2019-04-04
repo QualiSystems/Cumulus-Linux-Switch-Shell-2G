@@ -16,4 +16,9 @@ class CumulusLinuxAutoloadRunner(AutoloadRunner):
 
     @property
     def autoload_flow(self):
-        return CumulusLinuxSnmpAutoloadFlow(self.snmp_handler, self._logger)
+        """
+
+        :return:
+        """
+        return CumulusLinuxSnmpAutoloadFlow(snmp_handler=self.snmp_handler,
+                                            logger=self._logger)

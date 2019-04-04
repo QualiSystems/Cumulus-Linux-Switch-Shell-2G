@@ -11,6 +11,9 @@ from package.cloudshell.networking.cumulus.cli.handler import CumulusCliHandler
 from package.cloudshell.networking.cumulus.runners.autoload import CumulusLinuxAutoloadRunner
 from package.cloudshell.networking.cumulus.snmp.handler import CumulusLinuxSnmpHandler
 
+# from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
+
+
 
 class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
 
@@ -27,7 +30,10 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
 
         :param cloudshell.shell.core.driver_context.InitCommandContext context: the context the command runs on
         """
-        resource_config = create_networking_resource_from_context(self.SHELL_NAME, self.SUPPORTED_OS, context)
+        resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                  supported_os=self.SUPPORTED_OS,
+                                                                  context=context)
+
         session_pool_size = int(resource_config.sessions_concurrency_limit)
         self._cli = get_cli(session_pool_size)
 
@@ -290,6 +296,30 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         """
         pass
 
+    # def ApplyConnectivityChanges(self, context, request):
+    #     """Create vlan and add or remove it to/from network interface
+    #
+    #     :param ResourceCommandContext context: ResourceCommandContext object with all Resource Attributes inside
+    #     :param str request: request json
+    #     :return:
+    #     """
+    #
+    #     logger = get_logger_with_thread_id(context)
+    #     api = get_api(context)
+    #
+    #     resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+    #                                                               supported_os=self.SUPPORTED_OS,
+    #                                                               context=context)
+    #
+    #     cli_handler = CliHandler(self._cli, resource_config, logger, api)
+    #     connectivity_operations = ConnectivityRunner(logger=logger, cli_handler=cli_handler)
+    #     logger.info('Start applying connectivity changes, request is: {0}'.format(str(request)))
+    #     result = connectivity_operations.apply_connectivity_changes(request=request)
+    #     logger.info('Finished applying connectivity changes, response is: {0}'.format(str(result)))
+    #     logger.info('Apply Connectivity changes completed')
+    #
+    #     return result
+
 
 if __name__ == "__main__":
     import mock
@@ -316,7 +346,7 @@ if __name__ == "__main__":
     for attr, value in [("User", user),
                         ("Sessions Concurrency Limit", 1),
                         ("SNMP Version", "2"),
-                        ("Enable SNMP", "False"),
+                        ("Enable SNMP", "True"),
                         ("Disable SNMP", "False"),
                         ("SNMP Read Community", "mynotsosecretpassword"),
                         ("Sessions Concurrency Limit", 1),
@@ -347,4 +377,4 @@ if __name__ == "__main__":
     ERROR: Command not found.
     
     """
-    print(out)
+    # print(out)
