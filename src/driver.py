@@ -14,7 +14,6 @@ from package.cloudshell.networking.cumulus.snmp.handler import CumulusLinuxSnmpH
 # from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
 
 
-
 class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
 
     SUPPORTED_OS = [r"Cumulus"]
@@ -325,7 +324,8 @@ if __name__ == "__main__":
     import mock
     from cloudshell.shell.core.driver_context import ResourceCommandContext, ResourceContextDetails, ReservationContextDetails
 
-    address = '192.168.105.30'
+    # address = '192.168.105.30'
+    address = "adoc-lab.aa0.netvolante.jp"
 
     user = 'cumulus'
     password = 'CumulusLinux!'
@@ -346,8 +346,8 @@ if __name__ == "__main__":
     for attr, value in [("User", user),
                         ("Sessions Concurrency Limit", 1),
                         ("SNMP Version", "2"),
-                        ("Enable SNMP", "True"),
-                        ("Disable SNMP", "False"),
+                        ("Enable SNMP", "False"),
+                        ("Disable SNMP", "True"),
                         ("SNMP Read Community", "mynotsosecretpassword"),
                         ("Sessions Concurrency Limit", 1),
                         ("CLI Connection Type", "SSH"),
@@ -362,19 +362,11 @@ if __name__ == "__main__":
     dr = CumulusLinuxSwitchShell2GDriver()
     dr.initialize(context)
 
-    for res in  dr.get_inventory(context).resources:
+    for res in dr.get_inventory(context).resources:
         print res.__dict__
 
     # out = dr.health_check(context)
     # out = dr.run_custom_command(context=context, cancellation_context=None, custom_command="help")
     # out = dr.run_custom_config_command(context=context, cancellation_context=None, custom_command="helpso")
 
-
-    """
-    -bash: helpso: command not found
-    
-    cumulus@cumulus:~$ net cimmit
-    ERROR: Command not found.
-    
-    """
     # print(out)

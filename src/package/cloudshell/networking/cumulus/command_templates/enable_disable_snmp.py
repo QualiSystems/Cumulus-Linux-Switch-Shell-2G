@@ -3,60 +3,38 @@ from collections import OrderedDict
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
 
-ERROR_MAP = OrderedDict({"[Ii]nvalid\s*([Ii]nput|[Cc]ommand)|[Cc]ommand rejected":
-                             "Failed to initialize snmp. Please check Logs for details."})
+ERROR_MAP = OrderedDict([(r'[Cc]ommand not found', 'Command not found'), (r'[Ee]rror:|ERROR:', 'Command error')])
 
-SHOW_SNMP_STATUS = CommandTemplate("do show running-config | include snmp-server community", error_map=ERROR_MAP)
-"""
-cumulus@cumulus:~$ net show snmp-server status
+SHOW_SNMP_STATUS = CommandTemplate("net show snmp-server status", error_map=ERROR_MAP)
 
-Simple Network Management Protocol (SNMP) Daemon.
----------------------------------  ----------------
-Current Status                     active (running)
-Reload Status                      enabled
-Listening IP Addresses             all
-Main snmpd PID                     4202
-Version 1 and 2c Community String  Configured
-Version 3 Usernames                Not Configured
----------------------------------  ---------------- 
+ADD_LISTENING_ADDRESS = CommandTemplate('net add snmp-server listening-address all', error_map=ERROR_MAP)
 
-"""
+CREATE_VIEW = CommandTemplate('net add snmp-server viewname {view_name} included .1', error_map=ERROR_MAP)
 
-# ENABLE_SNMP = CommandTemplate("snmp-server community {snmp_community} {read_only}", error_map=ERROR_MAP)
+ENABLE_SNMP_READ = CommandTemplate('net add snmp-server readonly-community {snmp_community} access any '
+                                   'view {view_name}', error_map=ERROR_MAP)
 
-"""
-cumulus@router1:~$ net add snmp-server listening-address all
-Configuration has not changed 
+REMOVE_LISTENING_ADDRESS = CommandTemplate('net del snmp-server listening-address all', error_map=ERROR_MAP)
 
-cumulus@router1:~$ net add snmp-server readonly-community mynotsosecretpassword access any
+REMOVE_VIEW = CommandTemplate('net del snmp-server viewname {view_name} included .1', error_map=ERROR_MAP)
 
-cumulus@router1:~$ net add snmp-server system-name my little router
+DISABLE_SNMP_READ = CommandTemplate('net del snmp-server readonly-community {snmp_community} access any '
+                                    'view {view_name}', error_map=ERROR_MAP)
 
-cumulus@router1:~$ net commit
+COMMIT = CommandTemplate('net commit', error_map=ERROR_MAP)
 
-VRF
-net add snmp-server listening-address 10.10.10.10 vrf mgmt
+ABORT = CommandTemplate('net abort', error_map=ERROR_MAP)
 
 
-"""
-
-"""
-disable SNMP?? (will remove all SNMP settings)
-net del snmp-server all
-"""
-
-
-""" ENABLE SNMPv3
-
+"""ENABLE SNMPv3
 net add snmp-server username testusernoauth  auth-none
 net add snmp-server username testuserauth    auth-md5  myauthmd5password
 net add snmp-server username testuserboth    auth-md5  mynewmd5password   encrypt-aes  myencryptsecret
 net add snmp-server username limiteduser1    auth-md5  md5password1       encrypt-aes  myaessecret       oid 1.3.6.1.2.1.1
-
 """
 
-"""
-SNMP VIEW?
-"""
 
-# https://docs.cumulusnetworks.com/display/DOCS/Simple+Network+Management+Protocol+%28SNMP%29+Monitoring
+"""
+net add snmp-server username testusernoauth  auth-none view cumulusOnly
+net add snmp-server username limiteduser1    auth-md5  md5password1 encrypt-aes  myaessecret
+"""

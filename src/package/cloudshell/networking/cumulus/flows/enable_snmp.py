@@ -1,111 +1,52 @@
 from cloudshell.devices.flows.cli_action_flows import EnableSnmpFlow
+from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
+from cloudshell.snmp.snmp_parameters import SNMPV2WriteParameters
+from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
-
-
-from cloudshell.devices.flows.cli_action_flows import EnableSnmpFlow
-from cloudshell.snmp.snmp_parameters import SNMPV3Parameters, SNMPV2WriteParameters,\
-    SNMPV2ReadParameters
-
-# from cloudshell.firewall.fortinet.command_actions.snmp_actions import SnmpV2Actions, SnmpV3Actions
-# from cloudshell.firewall.fortinet.helpers.exceptions import FortiNetException
+from package.cloudshell.networking.cumulus.command_actions.snmp import SnmpV2Actions
 
 
 class CumulusLinuxEnableSnmpFlow(EnableSnmpFlow):
     def execute_flow(self, snmp_parameters):
-        if isinstance(snmp_parameters, SNMPV3Parameters):
-            flow = EnableSnmpV3
-        else:
-            flow = EnableSnmpV2
-
-        flow(self._cli_handler, self._logger, snmp_parameters).execute()
-
-
-class EnableSnmpV2(object):
-
-    def __init__(self, cli_handler, logger, snmp_param):
-        """Enable SNMP v2
-
-        :param cloudshell.firewall.fortinet.cli.cli_handler.FortiNetCliHandler cli_handler:
-        :param logging.Logger logger:
-        :param SNMPV2WriteParameters|SNMPV2ReadParameters snmp_param:
-        """
-        self._cli = cli_handler
-        self._logger = logger
-        self.snmp_param = snmp_param
-
-    def execute(self):
-        if isinstance(self.snmp_param, SNMPV2WriteParameters):
-            raise FortiNetException('FortiNet devices doesn\'t support write communities')
-
-        community = self.snmp_param.snmp_community
-        self._logger.info('Start creating SNMP community {}'.format(community))
-
-        with self._cli.get_cli_service(self._cli.enable_mode) as cli_service:
-            snmp_actions = SnmpV2Actions(cli_service, self._logger, self._cli.modes, community)
-
-            if snmp_actions.is_enabled():
-                self._logger.debug('SNMP Community "{}" already configured'.format(community))
-                return
-
-            snmp_actions.enable_server()
-            snmp_actions.enable_snmp()
-
-            if not snmp_actions.is_enabled():
-                msg = 'Failed to create SNMP community "{}"'.format(community)
-                self._logger.info(msg)
-                raise FortiNetException(msg)
-
-        self._logger.info('SNMP community {} created'.format(community))
-
-
-class EnableSnmpV3(object):
-    SNMP_AUTH_MAP = {v: k for k, v in SNMPV3Parameters.AUTH_PROTOCOL_MAP.items()}
-    SNMP_PRIV_MAP = {v: k for k, v in SNMPV3Parameters.PRIV_PROTOCOL_MAP.items()}
-    EXCLUDED_PRIV_TYPES = {'AES-192', '3DES-EDE'}
-
-    def __init__(self, cli_handler, logger, snmp_param):
-        """Enable SNMP v3
-        :param cloudshell.firewall.fortinet.cli.cli_handler.FortiNetCliHandler cli_handler:
-        :param logging.Logger logger:
-        :param SNMPV3Parameters snmp_param:
         """
 
-        self._cli = cli_handler
-        self._logger = logger
-        self.snmp_param = snmp_param
+        :param cloudshell.snmp.snmp_parameters.SNMPParameters snmp_parameters:
+        :return: commands output
+        """
+        with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as cli_service:
+            if isinstance(snmp_parameters, SNMPV3Parameters):
+                enable_snmp = self._enable_snmp_v3
+            else:
+                enable_snmp = self._enable_snmp_v2
 
-    def execute(self):
-        auth_type = self.SNMP_AUTH_MAP[self.snmp_param.auth_protocol]
-        priv_type = self.SNMP_PRIV_MAP[self.snmp_param.private_key_protocol]
-        user = self.snmp_param.snmp_user
+            enable_snmp(cli_service=cli_service, snmp_parameters=snmp_parameters)
 
-        self._logger.info('Start creating SNMP User "{}"'.format(user))
+    def _enable_snmp_v2(self, cli_service, snmp_parameters):
+        """
 
-        if priv_type in self.EXCLUDED_PRIV_TYPES:
-            raise FortiNetException('Doen\'t supported private key protocol {}'.format(priv_type))
+        :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
+        :param cloudshell.snmp.snmp_parameters.SNMPParameters snmp_parameters:
+        :return: commands output
+        """
+        snmp_community = snmp_parameters.snmp_community
 
-        with self._cli.get_cli_service(self._cli.enable_mode) as cli_service:
-            snmp_actions = SnmpV3Actions(
-                cli_service,
-                self._logger,
-                self._cli.modes,
-                user,
-                auth_type,
-                priv_type,
-                self.snmp_param.snmp_password,
-                self.snmp_param.snmp_private_key,
-            )
+        # todo: check write community
 
-            if snmp_actions.is_enabled():
-                self._logger.debug('SNMP User "{}" already configured'.format(user))
-                return
+        if not snmp_community:
+            raise Exception("SNMP community can not be empty")
 
-            snmp_actions.enable_server()
-            snmp_actions.enable_snmp()
+        # if isinstance(snmp_parameters, SNMPV2WriteParameters):
+        #     read_only_community = False
 
-            if not snmp_actions.is_enabled():
-                msg = 'Failed to create SNMP User "{}"'.format(user)
-                self._logger.info(msg)
-                raise FortiNetException(msg)
+        snmp_actions = SnmpV2Actions(cli_service=cli_service, logger=self._logger)
 
-        self._logger.info('SNMP User {} created'.format(user))
+        return snmp_actions.enable_snmp(snmp_community=snmp_community)
+
+    def _enable_snmp_v3(self, cli_service, snmp_parameters):
+        """
+
+        :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
+        :param cloudshell.snmp.snmp_parameters.SNMPParameters snmp_parameters:
+        :return: commands output
+        """
+        pass

@@ -1,11 +1,12 @@
 import re
 import os
-from package.cloudshell.networking.cumulus.autoload.snmp_entity_table import CiscoSNMPEntityTable
-from package.cloudshell.networking.cumulus.autoload.snmp_if_table import SnmpIfTable
 
 from cloudshell.devices.autoload.autoload_builder import AutoloadDetailsBuilder
 from cloudshell.devices.autoload.device_names import get_device_name
 from cloudshell.devices.standards.networking.autoload_structure import *
+
+from package.cloudshell.networking.cumulus.autoload.snmp_entity_table import CiscoSNMPEntityTable
+from package.cloudshell.networking.cumulus.autoload.snmp_if_table import SnmpIfTable
 
 
 class CumulusLinuxSNMPAutoload(object):
@@ -21,7 +22,6 @@ class CumulusLinuxSNMPAutoload(object):
         :param logger:
         :return:
         """
-
         self.snmp_handler = snmp_handler
         self.shell_name = shell_name
         self.shell_type = shell_type
@@ -35,20 +35,16 @@ class CumulusLinuxSNMPAutoload(object):
                                         unique_id=resource_name)
 
     def load_cisco_mib(self):
-        """
-        Loads Cisco specific mibs inside snmp handler
-
-        """
+        """Loads Cisco specific mibs inside snmp handler"""
         path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "mibs"))
         self.snmp_handler.update_mib_sources(path)
 
     def discover(self, supported_os):
-        """General entry point for autoload,
-        read device structure and attributes: chassis, modules, submodules, ports, port-channels and power supplies
+        """General entry point for autoload, read device structure and attributes: chassis, modules, submodules, ports,
 
+        port-channels and power supplies
         :return: AutoLoadDetails object
         """
-
         if not self._is_valid_device_os(supported_os):
             raise Exception(self.__class__.__name__, 'Unsupported device OS')
 
@@ -79,8 +75,8 @@ class CumulusLinuxSNMPAutoload(object):
         return autoload_details
 
     def _log_autoload_details(self, autoload_details):
-        """
-        Logging autoload details
+        """Logging autoload details
+
         :param autoload_details:
         :return:
         """
@@ -98,9 +94,9 @@ class CumulusLinuxSNMPAutoload(object):
 
     def _is_valid_device_os(self, supported_os):
         """Validate device OS using snmp
-            :return: True or False
-        """
 
+        :return: True or False
+        """
         system_description = self.snmp_handler.get_property('SNMPv2-MIB', 'sysDescr', '0')
         self.logger.debug('Detected system description: \'{0}\''.format(system_description))
         result = re.search(r"({0})".format("|".join(supported_os)),
@@ -152,7 +148,7 @@ class CumulusLinuxSNMPAutoload(object):
         return result
 
     def _get_device_details(self):
-        """ Get root element attributes """
+        """Get root element attributes """
 
         self.logger.info("Building Root")
         vendor = "Cisco"
@@ -166,7 +162,7 @@ class CumulusLinuxSNMPAutoload(object):
         self.resource.vendor = vendor
 
     def _load_snmp_tables(self):
-        """ Load all cisco required snmp tables
+        """Load all cisco required snmp tables
 
         :return:
         """
@@ -185,7 +181,6 @@ class CumulusLinuxSNMPAutoload(object):
 
         :param resource: object which contains all required data for certain resource
         """
-
         rel_seq = relative_path.split("/")
 
         if len(rel_seq) == 1:  # Chassis connected directly to root
@@ -203,7 +198,7 @@ class CumulusLinuxSNMPAutoload(object):
         self.elements.update({relative_path: resource})
 
     def _get_chassis_attributes(self, chassis_list):
-        """ Get Chassis element attributes """
+        """Get Chassis element attributes"""
 
         self.logger.info("Building Chassis")
         for chassis in chassis_list:
@@ -225,8 +220,7 @@ class CumulusLinuxSNMPAutoload(object):
         self.logger.info("Building Chassis completed")
 
     def _get_module_attributes(self, module_list):
-        """ Set attributes for all discovered modules """
-
+        """Set attributes for all discovered modules"""
         self.logger.info("Building Modules")
         for module in module_list:
             module_id = self.cisco_entity.relative_address.get(module)
@@ -259,7 +253,6 @@ class CumulusLinuxSNMPAutoload(object):
 
         :return:
         """
-
         self.logger.info("Building PowerPorts")
         for port in power_supply_list:
             port_id = self.entity_table[port]["entPhysicalParentRelPos"]
@@ -286,7 +279,6 @@ class CumulusLinuxSNMPAutoload(object):
 
         :return:
         """
-
         if not self.if_table.if_port_channels:
             return
         self.logger.info("Building Port Channels")
@@ -324,7 +316,6 @@ class CumulusLinuxSNMPAutoload(object):
 
         :return:
         """
-
         self.logger.info("Load Ports:")
         for port in port_list:
             port_if_entity = self.cisco_entity.port_mapping.get(port)
