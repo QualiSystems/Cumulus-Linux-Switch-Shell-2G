@@ -324,8 +324,8 @@ if __name__ == "__main__":
     import mock
     from cloudshell.shell.core.driver_context import ResourceCommandContext, ResourceContextDetails, ReservationContextDetails
 
-    # address = '192.168.105.30'
-    address = "adoc-lab.aa0.netvolante.jp"
+    address = '192.168.105.30'
+    # address = "adoc-lab.aa0.netvolante.jp"
 
     user = 'cumulus'
     password = 'CumulusLinux!'
@@ -345,10 +345,32 @@ if __name__ == "__main__":
 
     for attr, value in [("User", user),
                         ("Sessions Concurrency Limit", 1),
-                        ("SNMP Version", "2"),
-                        ("Enable SNMP", "False"),
-                        ("Disable SNMP", "True"),
-                        ("SNMP Read Community", "mynotsosecretpassword"),
+
+                        # SNMP v2 Read-only
+                        # ("SNMP Version", "2"),
+                        # ("Enable SNMP", "True"),
+                        # ("Disable SNMP", "True"),
+                        # ("SNMP Read Community", "mynotsosecretpassword"),
+                        # End SNMP v2 Read-only
+
+                        # SNMP v2 Read-Write
+                        # ("SNMP Version", "2"),
+                        # ("Enable SNMP", "True"),
+                        # ("Disable SNMP", "False"),
+                        # ("SNMP Write Community", "public"),
+                        # End SNMP v2 Read-Write
+
+                        # SNMP v3
+                        ("SNMP Version", "3"),
+                        ("Enable SNMP", "True"),
+                        ("Disable SNMP", "False"),
+                        ("SNMP V3 User", "quali"),
+                        ("SNMP V3 Password", "qualipass"),
+                        ("SNMP V3 Private Key", "qualipass2"),
+                        ("SNMP V3 Authentication Protocol", "No Authentication Protocol"),  # "No Authentication Protocol", "MD5", "SHA"
+                        ("SNMP V3 Privacy Protocol", "No Privacy Protocol"),  # "No Privacy Protocol", "DES", "3DES-EDE", "AES-128", "AES-192", "AES-256"
+                        # End SNMP v3
+
                         ("Sessions Concurrency Limit", 1),
                         ("CLI Connection Type", "SSH"),
                         ("Password", password)]:

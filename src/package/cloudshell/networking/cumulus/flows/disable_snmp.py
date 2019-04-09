@@ -1,9 +1,9 @@
 from cloudshell.devices.flows.cli_action_flows import DisableSnmpFlow
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
 from cloudshell.snmp.snmp_parameters import SNMPV2WriteParameters
-from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
 from package.cloudshell.networking.cumulus.command_actions.snmp import SnmpV2Actions
+from package.cloudshell.networking.cumulus.command_actions.snmp import SnmpV3Actions
 
 
 class CumulusLinuxDisableSnmpFlow(DisableSnmpFlow):
@@ -30,10 +30,11 @@ class CumulusLinuxDisableSnmpFlow(DisableSnmpFlow):
         """
         snmp_community = snmp_parameters.snmp_community
 
-        # todo: check write community
-
         if not snmp_community:
             raise Exception("SNMP community can not be empty")
+
+        if isinstance(snmp_parameters, SNMPV2WriteParameters):
+            raise Exception("Shell doesn't support SNMP v2 Read-write community")
 
         snmp_actions = SnmpV2Actions(cli_service=cli_service, logger=self._logger)
 
@@ -46,4 +47,6 @@ class CumulusLinuxDisableSnmpFlow(DisableSnmpFlow):
         :param cloudshell.snmp.snmp_parameters.SNMPParameters snmp_parameters:
         :return: commands output
         """
-        pass
+        snmp_v3_actions = SnmpV3Actions(cli_service, self._logger)
+
+        return snmp_v3_actions.disable_snmp(snmp_user=snmp_parameters.snmp_user)
