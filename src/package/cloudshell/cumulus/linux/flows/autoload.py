@@ -1,6 +1,6 @@
 from cloudshell.devices.flows.snmp_action_flows import AutoloadFlow
 
-from package.cloudshell.networking.cumulus.autoload.snmp import CumulusLinuxSNMPAutoload
+from package.cloudshell.cumulus.linux.autoload.snmp import CumulusLinuxSNMPAutoload
 
 
 class CumulusLinuxSnmpAutoloadFlow(AutoloadFlow):

@@ -2,8 +2,8 @@ from cloudshell.devices.flows.cli_action_flows import EnableSnmpFlow
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
 from cloudshell.snmp.snmp_parameters import SNMPV2WriteParameters
 
-from package.cloudshell.networking.cumulus.command_actions.snmp import SnmpV2Actions
-from package.cloudshell.networking.cumulus.command_actions.snmp import SnmpV3Actions
+from package.cloudshell.cumulus.linux.command_actions.snmp import SnmpV2Actions
+from package.cloudshell.cumulus.linux.command_actions.snmp import SnmpV3Actions
 
 
 class CumulusLinuxEnableSnmpFlow(EnableSnmpFlow):

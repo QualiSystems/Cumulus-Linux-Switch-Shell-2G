@@ -2,7 +2,7 @@ from cloudshell.cli.command_template.command_template_executor import CommandTem
 from cloudshell.cli.session.session_exceptions import CommandExecutionException
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
 
-from package.cloudshell.networking.cumulus.command_templates import enable_disable_snmp
+from package.cloudshell.cumulus.linux.command_templates import enable_disable_snmp
 
 
 COMMIT_COMMAND_TIMEOUT = 5 * 60

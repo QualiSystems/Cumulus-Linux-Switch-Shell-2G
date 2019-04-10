@@ -1,4 +1,4 @@
-from package.cloudshell.networking.cumulus.autoload.snmp_if_entity import SnmpIfEntity
+from package.cloudshell.cumulus.linux.autoload.snmp_if_entity import SnmpIfEntity
 
 
 class SnmpIfPortChannelEntity(SnmpIfEntity):

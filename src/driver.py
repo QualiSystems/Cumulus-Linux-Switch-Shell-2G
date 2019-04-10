@@ -7,9 +7,9 @@ from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterf
 from cloudshell.devices.runners.state_runner import StateRunner
 from cloudshell.devices.runners.run_command_runner import RunCommandRunner
 
-from package.cloudshell.networking.cumulus.cli.handler import CumulusCliHandler
-from package.cloudshell.networking.cumulus.runners.autoload import CumulusLinuxAutoloadRunner
-from package.cloudshell.networking.cumulus.snmp.handler import CumulusLinuxSnmpHandler
+from package.cloudshell.cumulus.linux.cli.handler import CumulusCliHandler
+from package.cloudshell.cumulus.linux.runners.autoload import CumulusLinuxAutoloadRunner
+from package.cloudshell.cumulus.linux.snmp.handler import CumulusLinuxSnmpHandler
 
 # from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
 

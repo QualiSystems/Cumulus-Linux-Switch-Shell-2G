@@ -5,8 +5,8 @@ from cloudshell.devices.autoload.autoload_builder import AutoloadDetailsBuilder
 from cloudshell.devices.autoload.device_names import get_device_name
 from cloudshell.devices.standards.networking.autoload_structure import *
 
-from package.cloudshell.networking.cumulus.autoload.snmp_entity_table import CiscoSNMPEntityTable
-from package.cloudshell.networking.cumulus.autoload.snmp_if_table import SnmpIfTable
+from package.cloudshell.cumulus.linux.autoload.snmp_entity_table import CiscoSNMPEntityTable
+from package.cloudshell.cumulus.linux.autoload.snmp_if_table import SnmpIfTable
 
 
 class CumulusLinuxSNMPAutoload(object):

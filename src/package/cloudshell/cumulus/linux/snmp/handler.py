@@ -1,7 +1,7 @@
 from cloudshell.devices.snmp_handler import SnmpHandler
 
-from package.cloudshell.networking.cumulus.flows.disable_snmp import CumulusLinuxDisableSnmpFlow
-from package.cloudshell.networking.cumulus.flows.enable_snmp import CumulusLinuxEnableSnmpFlow
+from package.cloudshell.cumulus.linux.flows.disable_snmp import CumulusLinuxDisableSnmpFlow
+from package.cloudshell.cumulus.linux.flows.enable_snmp import CumulusLinuxEnableSnmpFlow
 
 
 class CumulusLinuxSnmpHandler(SnmpHandler):

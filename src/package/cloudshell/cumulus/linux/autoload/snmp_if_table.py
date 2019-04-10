@@ -1,8 +1,9 @@
 import re
-from package.cloudshell.networking.cumulus.autoload.snmp_if_entity import SnmpIfEntity
-from package.cloudshell.networking.cumulus.autoload.snmp_if_port_channel_entity import SnmpIfPortChannelEntity
-from package.cloudshell.networking.cumulus.autoload.snmp_if_port_entity import SnmpIfPortEntity
-from package.cloudshell.networking.cumulus.autoload.snmp_port_attr_tables import SnmpPortAttrTables
+
+from package.cloudshell.cumulus.linux.autoload.snmp_if_entity import SnmpIfEntity
+from package.cloudshell.cumulus.linux.autoload.snmp_if_port_channel_entity import SnmpIfPortChannelEntity
+from package.cloudshell.cumulus.linux.autoload.snmp_if_port_entity import SnmpIfPortEntity
+from package.cloudshell.cumulus.linux.autoload.snmp_port_attr_tables import SnmpPortAttrTables
 
 
 class SnmpIfTable(object):

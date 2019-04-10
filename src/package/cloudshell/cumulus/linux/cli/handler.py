@@ -1,6 +1,6 @@
 from cloudshell.cli.command_mode_helper import CommandModeHelper
 from cloudshell.devices.cli_handler_impl import CliHandlerImpl
-from package.cloudshell.networking.cumulus.cli.command_modes import DefaultCommandMode
+from package.cloudshell.cumulus.linux.cli.command_modes import DefaultCommandMode
 
 
 class CumulusCliHandler(CliHandlerImpl):
