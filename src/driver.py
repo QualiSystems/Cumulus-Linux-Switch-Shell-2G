@@ -9,13 +9,13 @@ from cloudshell.devices.runners.run_command_runner import RunCommandRunner
 
 from package.cloudshell.cumulus.linux.cli.handler import CumulusCliHandler
 from package.cloudshell.cumulus.linux.runners.autoload import CumulusLinuxAutoloadRunner
+from package.cloudshell.cumulus.linux.runners.connectivity import CumulusLinuxConnectivityRunner
 from package.cloudshell.cumulus.linux.snmp.handler import CumulusLinuxSnmpHandler
 
 # from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
 
 
 class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
-
     SUPPORTED_OS = [r"Cumulus"]
     SHELL_NAME = "Cumulus Linux Switch 2G"
 
@@ -295,100 +295,212 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         """
         pass
 
-    # def ApplyConnectivityChanges(self, context, request):
-    #     """Create vlan and add or remove it to/from network interface
-    #
-    #     :param ResourceCommandContext context: ResourceCommandContext object with all Resource Attributes inside
-    #     :param str request: request json
-    #     :return:
-    #     """
-    #
-    #     logger = get_logger_with_thread_id(context)
-    #     api = get_api(context)
-    #
-    #     resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
-    #                                                               supported_os=self.SUPPORTED_OS,
-    #                                                               context=context)
-    #
-    #     cli_handler = CliHandler(self._cli, resource_config, logger, api)
-    #     connectivity_operations = ConnectivityRunner(logger=logger, cli_handler=cli_handler)
-    #     logger.info('Start applying connectivity changes, request is: {0}'.format(str(request)))
-    #     result = connectivity_operations.apply_connectivity_changes(request=request)
-    #     logger.info('Finished applying connectivity changes, response is: {0}'.format(str(result)))
-    #     logger.info('Apply Connectivity changes completed')
-    #
-    #     return result
+    def ApplyConnectivityChanges(self, context, request):
+        """
+        Create vlan and add or remove it to/from network interface
+        :param ResourceCommandContext context: ResourceCommandContext object with all Resource Attributes inside
+        :param str request: request json
+        :return:
+        """
+
+        logger = get_logger_with_thread_id(context)
+        logger.info('Apply connectivity changes command started with request: {}'.format(request))
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
+            connectivity_operations = CumulusLinuxConnectivityRunner(cli_handler=cli_handler,
+                                                                     logger=logger)
+
+            result = connectivity_operations.apply_connectivity_changes(request=request)
+            logger.info('Apply connectivity changes command completed with response: {}'.format(result))
+
+            return result
 
 
 if __name__ == "__main__":
+    import json
     import mock
     from cloudshell.shell.core.driver_context import ResourceCommandContext, ResourceContextDetails, ReservationContextDetails
 
-    address = '192.168.105.30'
-    # address = "adoc-lab.aa0.netvolante.jp"
+    def prepare_context():
+        """
 
-    user = 'cumulus'
-    password = 'CumulusLinux!'
-    port = 443
-    auth_key = 'h8WRxvHoWkmH8rLQz+Z/pg=='
-    api_port = 8029
+        :return:
+        """
+        """Return initialized driver instance"""
+        address = '192.168.105.30'
+        # address = "adoc-lab.aa0.netvolante.jp"
 
-    context = ResourceCommandContext(*(None,) * 4)
-    context.resource = ResourceContextDetails(*(None,) * 13)
-    context.resource.name = "Cumulus Linux Switch"
-    context.resource.fullname = "Cumulus Linux Switch"
-    context.resource.address = address
-    context.resource.family = "CS_Switch"
-    context.reservation = ReservationContextDetails(*(None,) * 7)
-    context.reservation.reservation_id = '0cc17f8c-75ba-495f-aeb5-df5f0f9a0e97'
-    context.resource.attributes = {}
+        user = 'cumulus'
+        password = 'CumulusLinux!'
+        port = 443
+        auth_key = 'h8WRxvHoWkmH8rLQz+Z/pg=='
+        api_port = 8029
 
-    for attr, value in [("User", user),
-                        ("Sessions Concurrency Limit", 1),
+        context = ResourceCommandContext(*(None,) * 4)
+        context.resource = ResourceContextDetails(*(None,) * 13)
+        context.resource.name = "Cumulus Linux Switch"
+        context.resource.fullname = "Cumulus Linux Switch"
+        context.resource.address = address
+        context.resource.family = "CS_Switch"
+        context.reservation = ReservationContextDetails(*(None,) * 7)
+        context.reservation.reservation_id = '0cc17f8c-75ba-495f-aeb5-df5f0f9a0e97'
+        context.resource.attributes = {}
 
-                        # SNMP v2 Read-only
-                        # ("SNMP Version", "2"),
-                        # ("Enable SNMP", "True"),
-                        # ("Disable SNMP", "True"),
-                        # ("SNMP Read Community", "mynotsosecretpassword"),
-                        # End SNMP v2 Read-only
+        for attr, value in [("User", user),
+                            ("Sessions Concurrency Limit", 1),
 
-                        # SNMP v2 Read-Write
-                        # ("SNMP Version", "2"),
-                        # ("Enable SNMP", "True"),
-                        # ("Disable SNMP", "False"),
-                        # ("SNMP Write Community", "public"),
-                        # End SNMP v2 Read-Write
+                            # SNMP v2 Read-only
+                            # ("SNMP Version", "2"),
+                            # ("Enable SNMP", "True"),
+                            # ("Disable SNMP", "True"),
+                            # ("SNMP Read Community", "mynotsosecretpassword"),
+                            # End SNMP v2 Read-only
 
-                        # SNMP v3
-                        ("SNMP Version", "3"),
-                        ("Enable SNMP", "True"),
-                        ("Disable SNMP", "False"),
-                        ("SNMP V3 User", "quali"),
-                        ("SNMP V3 Password", "qualipass"),
-                        ("SNMP V3 Private Key", "qualipass2"),
-                        ("SNMP V3 Authentication Protocol", "No Authentication Protocol"),  # "No Authentication Protocol", "MD5", "SHA"
-                        ("SNMP V3 Privacy Protocol", "No Privacy Protocol"),  # "No Privacy Protocol", "DES", "3DES-EDE", "AES-128", "AES-192", "AES-256"
-                        # End SNMP v3
+                            # SNMP v2 Read-Write
+                            # ("SNMP Version", "2"),
+                            # ("Enable SNMP", "True"),
+                            # ("Disable SNMP", "False"),
+                            # ("SNMP Write Community", "public"),
+                            # End SNMP v2 Read-Write
 
-                        ("Sessions Concurrency Limit", 1),
-                        ("CLI Connection Type", "SSH"),
-                        ("Password", password)]:
+                            # SNMP v3
+                            ("SNMP Version", "3"),
+                            ("Enable SNMP", "True"),
+                            ("Disable SNMP", "False"),
+                            ("SNMP V3 User", "quali"),
+                            ("SNMP V3 Password", "qualipass"),
+                            ("SNMP V3 Private Key", "qualipass2"),
+                            ("SNMP V3 Authentication Protocol", "No Authentication Protocol"),
+                            # "No Authentication Protocol", "MD5", "SHA"
+                            ("SNMP V3 Privacy Protocol", "No Privacy Protocol"),
+                            # "No Privacy Protocol", "DES", "3DES-EDE", "AES-128", "AES-192", "AES-256"
+                            # End SNMP v3
 
-        context.resource.attributes["{}.{}".format(CumulusLinuxSwitchShell2GDriver.SHELL_NAME, attr)] = value
+                            ("Sessions Concurrency Limit", 1),
+                            ("CLI Connection Type", "SSH"),
+                            ("Password", password)]:
+            context.resource.attributes["{}.{}".format(CumulusLinuxSwitchShell2GDriver.SHELL_NAME, attr)] = value
+            context.connectivity = mock.MagicMock()
+            context.connectivity.server_address = "192.168.85.27"
 
+        return context
 
-    context.connectivity = mock.MagicMock()
-    context.connectivity.server_address = "192.168.85.27"
+    def get_driver(context):
+        """
 
-    dr = CumulusLinuxSwitchShell2GDriver()
-    dr.initialize(context)
+        :return:
+        """
+        dr = CumulusLinuxSwitchShell2GDriver()
+        dr.initialize(context)
+        return dr
 
-    for res in dr.get_inventory(context).resources:
-        print res.__dict__
+    def get_inventory(driver, context):
+        """
 
-    # out = dr.health_check(context)
-    # out = dr.run_custom_command(context=context, cancellation_context=None, custom_command="help")
-    # out = dr.run_custom_config_command(context=context, cancellation_context=None, custom_command="helpso")
+        :param driver:
+        :return:
+        """
+        return [res.__dict__ for res in driver.get_inventory(context).resources]
 
-    # print(out)
+    def health_check(driver, context):
+        """
+
+        :param driver:
+        :return:
+        """
+        return driver.health_check(context)
+
+    def run_custom_command(driver, context, custom_command="help"):
+        """
+
+        :param driver:
+        :param context:
+        :param custom_command:
+        :return:
+        """
+        return driver.run_custom_command(context=context, cancellation_context=None, custom_command=custom_command)
+
+    def run_custom_config_command(driver, context, custom_command="help"):
+        """
+
+        :param driver:
+        :param context:
+        :param custom_command:
+        :return:
+        """
+        return driver.run_custom_config_command(context=context, cancellation_context=None, custom_command=custom_command)
+
+    def apply_connectivity_changes(driver, context, action="setVlan"):
+        """
+
+        :param driver:
+        :param context:
+        :param request:
+        :return:
+        """
+        request = {"driverRequest": {"actions": [{"connectionId": "22ec7879-e996-4f9a-83ab-bf24f1107281",
+                                                  "connectionParams": {"vlanId": "1000", "mode": "Access",
+                                                                       "vlanServiceAttributes": [
+                                                                           {"attributeName": "QnQ",
+                                                                            "attributeValue": "False",
+                                                                            "type": "vlanServiceAttribute"},
+                                                                           {"attributeName": "CTag",
+                                                                            "attributeValue": "",
+                                                                            "type": "vlanServiceAttribute"},
+                                                                           {"attributeName": "Isolation Level",
+                                                                            "attributeValue": "Shared",
+                                                                            "type": "vlanServiceAttribute"},
+                                                                           {"attributeName": "Access Mode",
+                                                                            "attributeValue": "Access",
+                                                                            "type": "vlanServiceAttribute"},
+                                                                           {"attributeName": "VLAN ID",
+                                                                            "attributeValue": "10",
+                                                                            "type": "vlanServiceAttribute"},
+                                                                           {"attributeName": "Pool Name",
+                                                                            "attributeValue": "",
+                                                                            "type": "vlanServiceAttribute"},
+                                                                           {"attributeName": "Virtual Network",
+                                                                            "attributeValue": "255",
+                                                                            "type": "vlanServiceAttribute"}],
+                                                                       "type": "setVlanParameter"},
+                                                  "connectorAttributes": [],
+                                                  "actionId": "22ec7879-e996-4f9a-83ab-bf24f1107281_085a8f57-d09d-4f92-9201-0da098d14c06",
+                                                  "actionTarget": {
+                                                      "fullName": "Cumulus Linux/Chassis 1/Port 1",
+                                                      "fullAddress": "192.168.105.30/CH1/P1",
+                                                      "type": "actionTarget"},
+                                                  "customActionAttributes": [], "type": action}]}}
+
+        return dr.ApplyConnectivityChanges(context, json.dumps(request))
+
+    context = prepare_context()
+    dr = get_driver(context)
+
+    # get inventory
+    # print get_inventory(driver=dr, context=context)
+
+    # # health check
+    # print health_check(driver=dr, context=context)
+    #
+    # # run custom command
+    # print run_custom_command(driver=dr, context=context)
+    #
+    # # run custom config command
+    # print run_custom_config_command(driver=dr, context=context)
+    #
+    # # run apply connectivity changes | set VLAN
+    print apply_connectivity_changes(driver=dr, context=context, action="setVlan")
+    #
+    # # run apply connectivity changes | remove VLAN
+    # print apply_connectivity_changes(driver=dr, context=context, action="removeVlan")
