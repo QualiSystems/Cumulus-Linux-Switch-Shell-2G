@@ -361,10 +361,10 @@ if __name__ == "__main__":
                             ("Sessions Concurrency Limit", 1),
 
                             # SNMP v2 Read-only
-                            # ("SNMP Version", "2"),
-                            # ("Enable SNMP", "True"),
-                            # ("Disable SNMP", "True"),
-                            # ("SNMP Read Community", "mynotsosecretpassword"),
+                            ("SNMP Version", "2"),
+                            ("Enable SNMP", "True"),
+                            ("Disable SNMP", "True"),
+                            ("SNMP Read Community", "mynotsosecretpassword"),
                             # End SNMP v2 Read-only
 
                             # SNMP v2 Read-Write
@@ -375,9 +375,9 @@ if __name__ == "__main__":
                             # End SNMP v2 Read-Write
 
                             # SNMP v3
-                            ("SNMP Version", "3"),
+                            # ("SNMP Version", "3"),
                             ("Enable SNMP", "True"),
-                            ("Disable SNMP", "False"),
+                            ("Disable SNMP", "True"),
                             ("SNMP V3 User", "quali"),
                             ("SNMP V3 Password", "qualipass"),
                             ("SNMP V3 Private Key", "qualipass2"),
@@ -392,7 +392,7 @@ if __name__ == "__main__":
                             ("Password", password)]:
             context.resource.attributes["{}.{}".format(CumulusLinuxSwitchShell2GDriver.SHELL_NAME, attr)] = value
             context.connectivity = mock.MagicMock()
-            context.connectivity.server_address = "192.168.85.27"
+            context.connectivity.server_address = "192.168.85.17"
 
         return context
 
@@ -488,7 +488,7 @@ if __name__ == "__main__":
     dr = get_driver(context)
 
     # get inventory
-    # print get_inventory(driver=dr, context=context)
+    print get_inventory(driver=dr, context=context)
 
     # # health check
     # print health_check(driver=dr, context=context)
@@ -500,7 +500,7 @@ if __name__ == "__main__":
     # print run_custom_config_command(driver=dr, context=context)
     #
     # # run apply connectivity changes | set VLAN
-    print apply_connectivity_changes(driver=dr, context=context, action="setVlan")
+    # print apply_connectivity_changes(driver=dr, context=context, action="setVlan")
     #
     # # run apply connectivity changes | remove VLAN
     # print apply_connectivity_changes(driver=dr, context=context, action="removeVlan")

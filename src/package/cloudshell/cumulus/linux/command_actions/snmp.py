@@ -1,15 +1,12 @@
 from cloudshell.cli.command_template.command_template_executor import CommandTemplateExecutor
-from cloudshell.cli.session.session_exceptions import CommandExecutionException
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
 
 from package.cloudshell.cumulus.linux.command_templates import enable_disable_snmp
 
 
-COMMIT_COMMAND_TIMEOUT = 5 * 60
-DEFAULT_VIEW_NAME = "Quali"
+class BaseSnmpActions(object):
+    DEFAULT_VIEW_NAME = "Quali"
 
-
-class SnmpV2Actions(object):
     def __init__(self, cli_service, logger):
         """
 
@@ -19,7 +16,59 @@ class SnmpV2Actions(object):
         self._cli_service = cli_service
         self._logger = logger
 
-    def enable_snmp(self, snmp_community, view_name=DEFAULT_VIEW_NAME, action_map=None, error_map=None):
+    def add_listening_address(self, action_map=None, error_map=None):
+        """
+
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.ADD_LISTENING_ADDRESS,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command()
+
+    def create_view(self, view_name=DEFAULT_VIEW_NAME, action_map=None, error_map=None):
+        """
+
+        :param view_name:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.CREATE_VIEW,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(view_name=view_name)
+
+    def remove_listening_address(self, action_map=None, error_map=None):
+        """
+
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.REMOVE_LISTENING_ADDRESS,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command()
+
+    def remove_view(self, view_name=DEFAULT_VIEW_NAME, action_map=None, error_map=None):
+        """
+
+        :param view_name:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.REMOVE_VIEW,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(view_name=view_name)
+
+
+class SnmpV2Actions(BaseSnmpActions):
+    def enable_snmp(self, snmp_community, view_name=BaseSnmpActions.DEFAULT_VIEW_NAME, action_map=None, error_map=None):
         """
 
         :param snmp_community:
@@ -28,80 +77,27 @@ class SnmpV2Actions(object):
         :param error_map:
         :return:
         """
-        try:
-            output = CommandTemplateExecutor(cli_service=self._cli_service,
-                                             command_template=enable_disable_snmp.ADD_LISTENING_ADDRESS,
-                                             action_map=action_map,
-                                             error_map=error_map).execute_command()
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.ENABLE_SNMP_READ,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(snmp_community=snmp_community,
+                                                                            view_name=view_name)
 
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.CREATE_VIEW,
-                                              action_map=action_map,
-                                              error_map=error_map).execute_command(view_name=view_name)
-
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.ENABLE_SNMP_READ,
-                                              action_map=action_map,
-                                              error_map=error_map).execute_command(snmp_community=snmp_community,
-                                                                                   view_name=view_name)
-
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.COMMIT,
-                                              action_map=action_map,
-                                              timeout=COMMIT_COMMAND_TIMEOUT,
-                                              error_map=error_map).execute_command()
-            return output
-
-        except CommandExecutionException:
-            self._logger.exception("Failed to Enable SNMPv2 on the device:")
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.ABORT,
-                                    action_map=action_map,
-                                    timeout=COMMIT_COMMAND_TIMEOUT,
-                                    error_map=error_map).execute_command()
-
-    def disable_snmp(self, snmp_community, view_name=DEFAULT_VIEW_NAME, action_map=None, error_map=None):
+    def disable_snmp(self, snmp_community, action_map=None, error_map=None):
         """
 
         :param snmp_community:
-        :param view_name:
         :param action_map:
         :param error_map:
         :return:
         """
-        try:
-            output = CommandTemplateExecutor(cli_service=self._cli_service,
-                                             command_template=enable_disable_snmp.REMOVE_LISTENING_ADDRESS,
-                                             action_map=action_map,
-                                             error_map=error_map).execute_command()
-
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.DISABLE_SNMP_READ,
-                                              action_map=action_map,
-                                              error_map=error_map).execute_command(snmp_community=snmp_community)
-
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.REMOVE_VIEW,
-                                              action_map=action_map,
-                                              error_map=error_map).execute_command(view_name=view_name)
-
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.COMMIT,
-                                              action_map=action_map,
-                                              timeout=COMMIT_COMMAND_TIMEOUT,
-                                              error_map=error_map).execute_command()
-            return output
-
-        except CommandExecutionException:
-            self._logger.exception("Failed to Disable SNMPv2 on the device:")
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.ABORT,
-                                    action_map=action_map,
-                                    timeout=COMMIT_COMMAND_TIMEOUT,
-                                    error_map=error_map).execute_command()
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.DISABLE_SNMP_READ,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(snmp_community=snmp_community)
 
 
-class SnmpV3Actions(object):
+class SnmpV3Actions(BaseSnmpActions):
 
     AUTH_COMMAND_MAP = {
         SNMPV3Parameters.AUTH_NO_AUTH: "auth-none",
@@ -118,17 +114,8 @@ class SnmpV3Actions(object):
         SNMPV3Parameters.PRIV_AES256: "encrypt-aes"  # todo: verify AES that corresponds to the cumulus
     }
 
-    def __init__(self, cli_service, logger):
-        """
-
-        :param cli_service:
-        :param logger:
-        """
-        self._cli_service = cli_service
-        self._logger = logger
-
     def enable_snmp(self, snmp_user, snmp_password, snmp_priv_key, snmp_auth_proto, snmp_priv_proto,
-                    view_name=DEFAULT_VIEW_NAME, action_map=None, error_map=None):
+                    view_name=BaseSnmpActions.DEFAULT_VIEW_NAME, action_map=None, error_map=None):
         """
 
         :param snmp_user:
@@ -151,76 +138,24 @@ class SnmpV3Actions(object):
         except KeyError:
             raise Exception("Privacy Protocol {} is not supported".format(snmp_priv_proto))
 
-        try:
-            output = CommandTemplateExecutor(cli_service=self._cli_service,
-                                             command_template=enable_disable_snmp.ADD_LISTENING_ADDRESS,
-                                             action_map=action_map,
-                                             error_map=error_map).execute_command()
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.ENABLE_SNMP_USER,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(snmp_user=snmp_user,
+                                                                            snmp_auth_proto=auth_command_template,
+                                                                            snmp_password=snmp_password,
+                                                                            snmp_priv_proto=priv_command_template,
+                                                                            snmp_priv_key=snmp_priv_key,view_name=view_name)
 
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.CREATE_VIEW,
-                                              action_map=action_map,
-                                              error_map=error_map).execute_command(view_name=view_name)
-
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.ENABLE_SNMP_USER,
-                                    action_map=action_map,
-                                    error_map=error_map).execute_command(snmp_user=snmp_user,
-                                                                         snmp_auth_proto=auth_command_template,
-                                                                         snmp_password=snmp_password,
-                                                                         snmp_priv_proto=priv_command_template,
-                                                                         snmp_priv_key=snmp_priv_key,
-                                                                         view_name=view_name)
-
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.COMMIT,
-                                    action_map=action_map,
-                                    timeout=COMMIT_COMMAND_TIMEOUT,
-                                    error_map=error_map).execute_command()
-
-        except CommandExecutionException:
-            self._logger.exception("Failed to Enable SNMPv3 on the device:")
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.ABORT,
-                                    action_map=action_map,
-                                    timeout=COMMIT_COMMAND_TIMEOUT,
-                                    error_map=error_map).execute_command()
-
-    def disable_snmp(self, snmp_user, view_name=DEFAULT_VIEW_NAME, action_map=None, error_map=None):
+    def disable_snmp(self, snmp_user, action_map=None, error_map=None):
         """
 
         :param snmp_user:
-        :param view_name:
         :param action_map:
         :param error_map:
         :return:
         """
-        try:
-            output = CommandTemplateExecutor(cli_service=self._cli_service,
-                                             command_template=enable_disable_snmp.REMOVE_LISTENING_ADDRESS,
-                                             action_map=action_map,
-                                             error_map=error_map).execute_command()
-
-            output += CommandTemplateExecutor(cli_service=self._cli_service,
-                                              command_template=enable_disable_snmp.REMOVE_VIEW,
-                                              action_map=action_map,
-                                              error_map=error_map).execute_command(view_name=view_name)
-
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.DISABLE_SNMP_USER,
-                                    action_map=action_map,
-                                    error_map=error_map).execute_command(snmp_user=snmp_user)
-
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.COMMIT,
-                                    action_map=action_map,
-                                    timeout=COMMIT_COMMAND_TIMEOUT,
-                                    error_map=error_map).execute_command()
-
-        except CommandExecutionException:
-            self._logger.exception("Failed to Enable SNMPv3 on the device:")
-            CommandTemplateExecutor(cli_service=self._cli_service,
-                                    command_template=enable_disable_snmp.ABORT,
-                                    action_map=action_map,
-                                    timeout=COMMIT_COMMAND_TIMEOUT,
-                                    error_map=error_map).execute_command()
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=enable_disable_snmp.DISABLE_SNMP_USER,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(snmp_user=snmp_user)

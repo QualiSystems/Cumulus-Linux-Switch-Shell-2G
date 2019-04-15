@@ -1,9 +1,7 @@
-from collections import OrderedDict
-
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
+from package.cloudshell.cumulus.linux.command_templates import ERROR_MAP
 
-ERROR_MAP = OrderedDict([(r'[Cc]ommand not found', 'Command not found'), (r'[Ee]rror:|ERROR:', 'Command error')])
 
 SHOW_SNMP_STATUS = CommandTemplate("net show snmp-server status", error_map=ERROR_MAP)
 
