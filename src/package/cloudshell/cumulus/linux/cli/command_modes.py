@@ -19,6 +19,33 @@ class DefaultCommandMode(CommandMode):
                                                  DefaultCommandMode.EXIT_COMMAND)
 
 
+class RootCommandMode(CommandMode):
+    PROMPT = r"#\s*$"
+    ENTER_COMMAND = 'sudo -i'
+    EXIT_COMMAND = "exit"
+
+    def __init__(self, resource_config, api):
+        """
+        Initialize Config command mode
+        :param resource_config:
+        """
+
+        self.resource_config = resource_config
+        self._api = api
+
+        CommandMode.__init__(self,
+                             RootCommandMode.PROMPT,
+                             RootCommandMode.ENTER_COMMAND,
+                             RootCommandMode.EXIT_COMMAND,
+                             enter_action_map=self.enter_action_map())
+
+    def enter_action_map(self):
+        return {}
+        # return {r"{}.*$".format(RootCommandMode.PROMPT): self._check_config_mode}
+
+
 CommandMode.RELATIONS_DICT = {
-    DefaultCommandMode: {}
+    DefaultCommandMode: {
+        RootCommandMode: {}
+    }
 }

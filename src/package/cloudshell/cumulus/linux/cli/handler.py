@@ -1,6 +1,8 @@
 from cloudshell.cli.command_mode_helper import CommandModeHelper
 from cloudshell.devices.cli_handler_impl import CliHandlerImpl
+
 from package.cloudshell.cumulus.linux.cli.command_modes import DefaultCommandMode
+from package.cloudshell.cumulus.linux.cli.command_modes import RootCommandMode
 
 
 class CumulusCliHandler(CliHandlerImpl):
@@ -15,3 +17,8 @@ class CumulusCliHandler(CliHandlerImpl):
     @property
     def config_mode(self):
         return self.modes[DefaultCommandMode]
+
+    @property
+    def root_mode(self):
+        return self.modes[RootCommandMode]
+

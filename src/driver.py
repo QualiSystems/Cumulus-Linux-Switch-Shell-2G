@@ -4,12 +4,12 @@ from cloudshell.devices.standards.networking.configuration_attributes_structure 
     create_networking_resource_from_context
 from cloudshell.shell.core.driver_utils import GlobalLock
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
-from cloudshell.devices.runners.state_runner import StateRunner
 from cloudshell.devices.runners.run_command_runner import RunCommandRunner
 
 from package.cloudshell.cumulus.linux.cli.handler import CumulusCliHandler
 from package.cloudshell.cumulus.linux.runners.autoload import CumulusLinuxAutoloadRunner
 from package.cloudshell.cumulus.linux.runners.connectivity import CumulusLinuxConnectivityRunner
+from package.cloudshell.cumulus.linux.runners.state import CumulusLinuxStateRunner
 from package.cloudshell.cumulus.linux.snmp.handler import CumulusLinuxSnmpHandler
 
 # from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
@@ -179,7 +179,30 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         :param ResourceCommandContext context: The context object for the command with resource and reservation info
         :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
         """
-        pass
+        logger = get_logger_with_thread_id(context)
+        logger.info('Shutdown command started')
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
+            state_operations = CumulusLinuxStateRunner(logger=logger,
+                                                       api=api,
+                                                       resource_config=resource_config,cli_handler=cli_handler)
+
+
+            result = state_operations.shutdown()
+            logger.info('Shutdown command ended with result: {}'.format(result))
+
+            return result
 
     def orchestration_save(self, context, cancellation_context, mode, custom_params):
         """Saves the Shell state and returns a description of the saved artifacts and information
@@ -278,10 +301,10 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                             logger=logger,
                                             api=api)
 
-            state_operations = StateRunner(logger=logger,
-                                           api=api,
-                                           resource_config=resource_config,
-                                           cli_handler=cli_handler)
+            state_operations = CumulusLinuxStateRunner(logger=logger,
+                                                       api=api,
+                                                       resource_config=resource_config,
+                                                       cli_handler=cli_handler)
 
             result = state_operations.health_check()
             logger.info('Health Check command ended with result: {}'.format(result))
@@ -421,6 +444,14 @@ if __name__ == "__main__":
         """
         return driver.health_check(context)
 
+    def shutdown(driver, context):
+        """
+
+        :param driver:
+        :return:
+        """
+        return driver.shutdown(context, None)
+
     def run_custom_command(driver, context, custom_command="help"):
         """
 
@@ -488,10 +519,13 @@ if __name__ == "__main__":
     dr = get_driver(context)
 
     # get inventory
-    print get_inventory(driver=dr, context=context)
+    # print get_inventory(driver=dr, context=context)
 
     # # health check
     # print health_check(driver=dr, context=context)
+    #
+    # # shitdown
+    print shutdown(driver=dr, context=context)
     #
     # # run custom command
     # print run_custom_command(driver=dr, context=context)
