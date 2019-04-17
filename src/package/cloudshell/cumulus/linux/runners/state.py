@@ -4,10 +4,17 @@ from package.cloudshell.cumulus.linux.flows.shutdown import CumulusLinuxShutdown
 
 
 class CumulusLinuxStateRunner(StateRunner):
-    def shutdown(self):
-        """Shutdown device"""
-        return self.shutdown_flow.execute_flow()
-
     @property
     def shutdown_flow(self):
+        """
+
+        :return:
+        """
         return CumulusLinuxShutdownFlow(cli_handler=self.cli_handler, logger=self._logger)
+
+    def shutdown(self):
+        """
+
+        :return:
+        """
+        return self.shutdown_flow.execute_flow()

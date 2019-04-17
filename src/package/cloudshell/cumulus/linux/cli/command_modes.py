@@ -32,6 +32,7 @@ class RootCommandMode(CommandMode):
 
         self.resource_config = resource_config
         self._api = api
+        self._root_password = None
 
         CommandMode.__init__(self,
                              RootCommandMode.PROMPT,
@@ -39,9 +40,21 @@ class RootCommandMode(CommandMode):
                              RootCommandMode.EXIT_COMMAND,
                              enter_action_map=self.enter_action_map())
 
+    @property
+    def root_password(self):
+        """
+
+        :return:
+        """
+        if not self._root_password:
+            # todo: specify which password to use here
+            password = self.resource_config.password
+            self._root_password = self._api.DecryptPassword(password).Value
+
+        return self._root_password
+
     def enter_action_map(self):
-        return {}
-        # return {r"{}.*$".format(RootCommandMode.PROMPT): self._check_config_mode}
+        return {"[Pp]assword": lambda session, logger: session.send_line(self.root_password, logger)}
 
 
 CommandMode.RELATIONS_DICT = {
