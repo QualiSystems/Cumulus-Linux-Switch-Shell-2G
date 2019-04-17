@@ -108,10 +108,10 @@ class SnmpV3Actions(BaseSnmpActions):
     PRIV_COMMAND_MAP = {
         SNMPV3Parameters.PRIV_NO_PRIV: "",
         SNMPV3Parameters.PRIV_DES: "encrypt-des",
+        SNMPV3Parameters.PRIV_AES128: "encrypt-aes",
         # SNMPV3Parameters.PRIV_3DES: "",  # not supported by device
-        SNMPV3Parameters.PRIV_AES128: "encrypt-aes",  # todo: verify AES that corresponds to the cumulus
-        SNMPV3Parameters.PRIV_AES192: "encrypt-aes",  # todo: verify AES that corresponds to the cumulus
-        SNMPV3Parameters.PRIV_AES256: "encrypt-aes"  # todo: verify AES that corresponds to the cumulus
+        # SNMPV3Parameters.PRIV_AES192: "encrypt-aes",  # not supported by device
+        # SNMPV3Parameters.PRIV_AES256: "encrypt-aes"   # not supported by device
     }
 
     def enable_snmp(self, snmp_user, snmp_password, snmp_priv_key, snmp_auth_proto, snmp_priv_proto,
