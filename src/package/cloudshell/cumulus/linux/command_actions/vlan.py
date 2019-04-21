@@ -53,3 +53,42 @@ class VLANActions(object):
                                        command_template=add_remove_vlan.ADD_ACCESS_VLAN_TO_PORT,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(port=port, vlan=vlan)
+
+    def remove_port_from_bridge(self, port, action_map=None, error_map=None):
+        """
+
+        :param port:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=add_remove_vlan.REMOVE_PORT_FROM_BRIDGE,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(port=port)
+
+    def remove_trunk_vlan_on_port(self, port, action_map=None, error_map=None):
+        """
+
+        :param port:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=add_remove_vlan.REMOVE_TRUNK_VLAN_ON_PORT,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(port=port)
+
+    def remove_access_vlan_on_port(self, port, action_map=None, error_map=None):
+        """
+
+        :param port:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=add_remove_vlan.REMOVE_ACCESS_VLAN_ON_PORT,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(port=port)
