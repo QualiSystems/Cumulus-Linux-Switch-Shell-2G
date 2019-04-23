@@ -81,3 +81,38 @@ class FileSystemActions(object):
                                        command_template=filesystem.REMOVE_FOLDER,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(name=name)
+
+    def create_tmp_file(self, action_map=None, error_map=None):
+        """
+
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        tmp_file = CommandTemplateExecutor(cli_service=self._cli_service,
+                                           command_template=filesystem.CREATE_TEMP_FILE,
+                                           action_map=action_map,
+                                           remove_prompt=True,
+                                           error_map=error_map).execute_command()
+
+        from cloudshell.cli.command_template.command_template import CommandTemplate
+
+        from package.cloudshell.cumulus.linux.command_templates import ERROR_MAP
+
+        CommandTemplate("chmod 755 {}".format(tmp_file.rstrip()), error_map=ERROR_MAP)
+
+        return tmp_file.rstrip()
+
+    def chown_file(self, user_name, file_name, action_map=None, error_map=None):
+        """
+
+        :param user_name:
+        :param file_name:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=filesystem.CHOWN_FILE,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(user_name=user_name, file_name=file_name)

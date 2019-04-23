@@ -99,6 +99,29 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                             logger=logger,
                                             api=api)
 
+            if configuration_type == "startup":
+                raise Exception("Shell doesn't support 'Startup' configuration type")
+
+            if restore_method == "append":
+                raise Exception("Shell doesn't support 'Append' restore method")
+
+            configuration_type = "running"
+            restore_method = "override"
+
+            if not vrf_management_name:
+                vrf_management_name = resource_config.vrf_management_name
+
+            configuration_operations = CumulusLinuxConfigurationRunner(cli_handler=cli_handler,
+                                                                       resource_config=resource_config,
+                                                                       api=api,
+                                                                       logger=logger)
+
+            configuration_operations.restore(path=path,
+                                             restore_method=restore_method,
+                                             configuration_type=configuration_type,
+                                             vrf_management_name=vrf_management_name)
+
+            logger.info("Restore command completed")
 
     def save(self, context, cancellation_context, folder_path, configuration_type, vrf_management_name):
         """Creates a configuration file and saves it to the provided destination
