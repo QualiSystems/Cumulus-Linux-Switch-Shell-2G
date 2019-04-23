@@ -34,8 +34,7 @@ class CumulusLinuxAddVlanFlow(AddVlanFlow):
 
             try:
                 if qnq:
-                    # todo: add support for QnQ
-                    pass
+                    raise Exception("Shell doesn't support QinQ")
                 else:
                     output = vlan_actions.add_port_to_bridge(port=port)
 

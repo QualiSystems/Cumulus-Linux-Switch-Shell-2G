@@ -33,17 +33,12 @@ class CumulusLinuxRemoveVlanFlow(RemoveVlanFlow):
             commit_actions = CommitActions(cli_service=cli_service, logger=self._logger)
 
             try:
-                # todo: add support for QnQ
-                qnq = False
-                if qnq:
-                    pass
-                else:
-                    output = vlan_actions.remove_port_from_bridge(port=port)
+                output = vlan_actions.remove_port_from_bridge(port=port)
 
-                    if port_mode == "trunk":
-                        output += vlan_actions.remove_trunk_vlan_on_port(port=port)
-                    else:
-                        output += vlan_actions.remove_access_vlan_on_port(port=port)
+                if port_mode == "trunk":
+                    output += vlan_actions.remove_trunk_vlan_on_port(port=port)
+                else:
+                    output += vlan_actions.remove_access_vlan_on_port(port=port)
 
                 output += commit_actions.commit()
 
