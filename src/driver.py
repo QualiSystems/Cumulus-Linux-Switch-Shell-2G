@@ -13,6 +13,7 @@ from package.cloudshell.cumulus.linux.runners.state import CumulusLinuxStateRunn
 from package.cloudshell.cumulus.linux.snmp.handler import CumulusLinuxSnmpHandler
 
 # from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
+from package.cloudshell.cumulus.linux.runners.configuration import CumulusLinuxConfigurationRunner
 
 
 class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
@@ -83,7 +84,21 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         :param str configuration_type: Specify whether the file should update the startup or running config.
         :param str vrf_management_name: Optional. Virtual routing and Forwarding management name
         """
-        pass
+        logger = get_logger_with_thread_id(context)
+        logger.info('Restore command started')
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
 
     def save(self, context, cancellation_context, folder_path, configuration_type, vrf_management_name):
         """Creates a configuration file and saves it to the provided destination
@@ -96,7 +111,40 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         :return The configuration file name.
         :rtype: str
         """
-        pass
+        logger = get_logger_with_thread_id(context)
+        logger.info('Save command started')
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
+            if configuration_type == "startup":
+                raise Exception("Shell doesn't support 'Startup' configuration type")
+
+            configuration_type = 'running'
+
+            if not vrf_management_name:
+                vrf_management_name = resource_config.vrf_management_name
+
+            configuration_operations = CumulusLinuxConfigurationRunner(cli_handler=cli_handler,
+                                                                       resource_config=resource_config,
+                                                                       api=api,
+                                                                       logger=logger)
+
+            response = configuration_operations.save(folder_path=folder_path,
+                                                     configuration_type=configuration_type,
+                                                     vrf_management_name=vrf_management_name)
+            logger.info('Save command completed')
+
+            return response
 
     def load_firmware(self, context, cancellation_context, path, vrf_management_name):
         """Upload and updates firmware on the resource
@@ -105,7 +153,20 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         :param str path: path to tftp server where firmware file is stored
         :param str vrf_management_name: Optional. Virtual routing and Forwarding management name
         """
-        pass
+        logger = get_logger_with_thread_id(context)
+        logger.info('Load firmware command started')
+
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
 
     def run_custom_command(self, context, cancellation_context, custom_command):
         """Executes a custom command on the device
@@ -383,6 +444,13 @@ if __name__ == "__main__":
         for attr, value in [("User", user),
                             ("Sessions Concurrency Limit", 1),
 
+                            # Backup location attributes for the "Save" command
+                            ("Backup Location", "//home/cumulus/backups"),
+                            ("Backup Type", "File System"),
+                            ("Backup User", "backup_user"),
+                            ("Backup Password", "backup_pass"),
+
+
                             # SNMP v2 Read-only
                             ("SNMP Version", "2"),
                             ("Enable SNMP", "True"),
@@ -415,7 +483,7 @@ if __name__ == "__main__":
                             ("Password", password)]:
             context.resource.attributes["{}.{}".format(CumulusLinuxSwitchShell2GDriver.SHELL_NAME, attr)] = value
             context.connectivity = mock.MagicMock()
-            context.connectivity.server_address = "192.168.85.17"
+            context.connectivity.server_address = "192.168.85.9"
 
         return context
 
@@ -472,6 +540,22 @@ if __name__ == "__main__":
         """
         return driver.run_custom_config_command(context=context, cancellation_context=None, custom_command=custom_command)
 
+    def save(driver, context, folder_path, configuration_type, vrf_management_name=""):
+        """
+        
+        :param driver: 
+        :param context: 
+        :param folder_path: 
+        :param configuration_type: 
+        :param vrf_management_name: 
+        :return: 
+        """
+        return driver.save(context=context,
+                           cancellation_context=None,
+                           folder_path=folder_path,
+                           configuration_type=configuration_type,
+                           vrf_management_name=vrf_management_name)
+
     def apply_connectivity_changes(driver, context, action="setVlan"):
         """
 
@@ -524,8 +608,8 @@ if __name__ == "__main__":
     # # health check
     # print health_check(driver=dr, context=context)
     #
-    # # shitdown
-    print shutdown(driver=dr, context=context)
+    # # shutdown
+    # print shutdown(driver=dr, context=context)
     #
     # # run custom command
     # print run_custom_command(driver=dr, context=context)
@@ -533,6 +617,9 @@ if __name__ == "__main__":
     # # run custom config command
     # print run_custom_config_command(driver=dr, context=context)
     #
+    # # run save command
+    print save(driver=dr, context=context, folder_path="", configuration_type="shalk", vrf_management_name="")
+
     # # run apply connectivity changes | set VLAN
     # print apply_connectivity_changes(driver=dr, context=context, action="setVlan")
     #

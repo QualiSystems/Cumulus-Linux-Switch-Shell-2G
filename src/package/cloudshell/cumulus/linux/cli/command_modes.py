@@ -49,7 +49,10 @@ class RootCommandMode(CommandMode):
         if not self._root_password:
             # todo: specify which password to use here
             password = self.resource_config.password
-            self._root_password = self._api.DecryptPassword(password).Value
+
+            return password
+            # todo: uncomment this line
+            # self._root_password = self._api.DecryptPassword(password).Value
 
         return self._root_password
 
