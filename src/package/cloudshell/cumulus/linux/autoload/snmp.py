@@ -151,7 +151,7 @@ class CumulusLinuxSNMPAutoload(object):
         """Get root element attributes """
 
         self.logger.info("Building Root")
-        vendor = "Cisco"
+        vendor = "Cumulus Networks"
 
         self.resource.contact_name = self.snmp_handler.get_property('SNMPv2-MIB', 'sysContact', '0')
         self.resource.system_name = self.snmp_handler.get_property('SNMPv2-MIB', 'sysName', '0')

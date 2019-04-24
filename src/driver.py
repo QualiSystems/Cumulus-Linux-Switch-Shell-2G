@@ -99,10 +99,10 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                             logger=logger,
                                             api=api)
 
-            if configuration_type == "startup":
+            if configuration_type.lower() == "startup":
                 raise Exception("Shell doesn't support 'Startup' configuration type")
 
-            if restore_method == "append":
+            if restore_method.lower() == "append":
                 raise Exception("Shell doesn't support 'Append' restore method")
 
             configuration_type = "running"
@@ -149,7 +149,7 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                             logger=logger,
                                             api=api)
 
-            if configuration_type == "startup":
+            if configuration_type.lower() == "startup":
                 raise Exception("Shell doesn't support 'Startup' configuration type")
 
             configuration_type = 'running'
