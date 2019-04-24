@@ -13,18 +13,35 @@ class FileSystemActions(object):
         self._cli_service = cli_service
         self._logger = logger
 
-    def create_folder(self, name, action_map=None, error_map=None):
+    def create_tmp_file(self, action_map=None, error_map=None):
         """
 
-        :param name:
         :param action_map:
         :param error_map:
         :return:
         """
-        return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.CREATE_FOLDER,
-                                       action_map=action_map,
-                                       error_map=error_map).execute_command(name=name)
+        tmp_file = CommandTemplateExecutor(cli_service=self._cli_service,
+                                           command_template=filesystem.CREATE_TEMP_FILE,
+                                           action_map=action_map,
+                                           remove_prompt=True,
+                                           error_map=error_map).execute_command()
+
+        return tmp_file.rstrip()
+
+    def create_tmp_dir(self, action_map=None, error_map=None):
+        """
+
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        tmp_dir = CommandTemplateExecutor(cli_service=self._cli_service,
+                                          command_template=filesystem.CREATE_TEMP_DIR,
+                                          action_map=action_map,
+                                          remove_prompt=True,
+                                          error_map=error_map).execute_command()
+
+        return tmp_dir.rstrip()
 
     def copy_folder(self, src_folder, dst_folder, action_map=None, error_map=None):
         """
@@ -55,7 +72,7 @@ class FileSystemActions(object):
                                        action_map=action_map,
                                        error_map=error_map).execute_command(src_file=src_file, dst_folder=dst_folder)
 
-    def compress_folder(self, compress_name, folder, action_map=None, error_map=None):
+    def tar_compress_folder(self, compress_name, folder, action_map=None, error_map=None):
         """
 
         :param compress_name:
@@ -65,11 +82,66 @@ class FileSystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.COMPRESS_FOLDER,
+                                       command_template=filesystem.TAR_COMPRESS_FOLDER,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(compress_name=compress_name, folder=folder)
 
-    def remove_folder(self, name, action_map=None, error_map=None):
+    def tar_uncompress_folder(self, compressed_file, destination, action_map=None, error_map=None):
+        """
+
+        :param compressed_file:
+        :param destination:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=filesystem.TAR_UNCOMPRESS_FOLDER,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(compressed_file=compressed_file,
+                                                                            destination=destination)
+
+    def curl_upload_file(self, file_path, remote_url, action_map=None, error_map=None):
+        """
+
+        :param file_path:
+        :param remote_url:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=filesystem.CURL_UPLOAD_FILE,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(file_path=file_path, remote_url=remote_url)
+
+    def curl_download_file(self, remote_url, file_path, action_map=None, error_map=None):
+        """
+
+        :param remote_url:
+        :param file_path:
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=filesystem.CURL_DOWNLOAD_FILE,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command(remote_url=remote_url, file_path=file_path)
+
+    def if_reload(self, action_map=None, error_map=None):
+        """
+
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=filesystem.IF_RELOAD,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command()
+
+    def restart_service(self, name, action_map=None, error_map=None):
         """
 
         :param name:
@@ -78,41 +150,6 @@ class FileSystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.REMOVE_FOLDER,
+                                       command_template=filesystem.RESTART_SERVICE,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(name=name)
-
-    def create_tmp_file(self, action_map=None, error_map=None):
-        """
-
-        :param action_map:
-        :param error_map:
-        :return:
-        """
-        tmp_file = CommandTemplateExecutor(cli_service=self._cli_service,
-                                           command_template=filesystem.CREATE_TEMP_FILE,
-                                           action_map=action_map,
-                                           remove_prompt=True,
-                                           error_map=error_map).execute_command()
-
-        from cloudshell.cli.command_template.command_template import CommandTemplate
-
-        from package.cloudshell.cumulus.linux.command_templates import ERROR_MAP
-
-        CommandTemplate("chmod 755 {}".format(tmp_file.rstrip()), error_map=ERROR_MAP)
-
-        return tmp_file.rstrip()
-
-    def chown_file(self, user_name, file_name, action_map=None, error_map=None):
-        """
-
-        :param user_name:
-        :param file_name:
-        :param action_map:
-        :param error_map:
-        :return:
-        """
-        return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.CHOWN_FILE,
-                                       action_map=action_map,
-                                       error_map=error_map).execute_command(user_name=user_name, file_name=file_name)

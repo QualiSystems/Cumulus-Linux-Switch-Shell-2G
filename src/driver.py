@@ -468,10 +468,16 @@ if __name__ == "__main__":
                             ("Sessions Concurrency Limit", 1),
 
                             # Backup location attributes for the "Save" command
-                            ("Backup Location", "//home/cumulus/backups"),
+                            ("Backup Location", "/home/cumulus/backups"),
                             ("Backup Type", "File System"),
                             ("Backup User", "backup_user"),
                             ("Backup Password", "backup_pass"),
+
+                            # Backup location attributes for the "Save" command
+                            # ("Backup Location", "192.168.85.13/home/quali/"),
+                            # ("Backup Type", "scp"),
+                            # ("Backup User", "quali"),
+                            # ("Backup Password", "quali"),
 
 
                             # SNMP v2 Read-only
@@ -503,10 +509,12 @@ if __name__ == "__main__":
 
                             ("Sessions Concurrency Limit", 1),
                             ("CLI Connection Type", "SSH"),
-                            ("Password", password)]:
+                            ("Password", password),
+                            ("Enable Password", password)]:
+
             context.resource.attributes["{}.{}".format(CumulusLinuxSwitchShell2GDriver.SHELL_NAME, attr)] = value
             context.connectivity = mock.MagicMock()
-            context.connectivity.server_address = "192.168.85.9"
+            context.connectivity.server_address = "192.168.85.10"
 
         return context
 
@@ -579,6 +587,24 @@ if __name__ == "__main__":
                            configuration_type=configuration_type,
                            vrf_management_name=vrf_management_name)
 
+    def restore(driver, context, path, configuration_type, restore_method, vrf_management_name=""):
+        """
+
+        :param driver:
+        :param context:
+        :param path:
+        :param configuration_type:
+        :param restore_method:
+        :param vrf_management_name:
+        :return:
+        """
+        return driver.restore(context=context,
+                              cancellation_context=None,
+                              path=path,
+                              configuration_type=configuration_type,
+                              restore_method=restore_method,
+                              vrf_management_name=vrf_management_name)
+
     def apply_connectivity_changes(driver, context, action="setVlan"):
         """
 
@@ -641,7 +667,33 @@ if __name__ == "__main__":
     # print run_custom_config_command(driver=dr, context=context)
     #
     # # run save command
-    print save(driver=dr, context=context, folder_path="", configuration_type="shalk", vrf_management_name="")
+    # print save(driver=dr,
+    #            context=context,
+    #            folder_path="",
+    #            configuration_type="running",
+    #            vrf_management_name="")
+    #
+    # print save(driver=dr,
+    #            context=context,
+    #            folder_path="scp://quali:quali@192.168.85.13/home/quali",
+    #            configuration_type="shalk",
+    #            vrf_management_name="")
+    #
+    # print save(driver=dr,
+    #            context=context,
+    #            folder_path="ftp://test_user:test_password@192.168.42.102",
+    #            configuration_type="shalk",
+    #            vrf_management_name="")
+    #
+    print restore(driver=dr,
+                  context=context,
+                  path="ftp://test_user:test_password@192.168.42.102/Cumulus_Linux_Switch-running-240419-180106",
+                  configuration_type="running",
+                  restore_method="override",
+                  vrf_management_name="")
+
+
+
 
     # # run apply connectivity changes | set VLAN
     # print apply_connectivity_changes(driver=dr, context=context, action="setVlan")

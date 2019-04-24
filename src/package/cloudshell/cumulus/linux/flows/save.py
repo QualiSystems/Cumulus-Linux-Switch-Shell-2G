@@ -1,9 +1,4 @@
-import datetime
-import tempfile
-
-from cloudshell.cli.session.ssh_session import SSHSession
 from cloudshell.devices.flows.cli_action_flows import SaveConfigurationFlow
-from scp import SCPClient
 
 from package.cloudshell.cumulus.linux.command_actions.filesystem import FileSystemActions
 
@@ -54,10 +49,7 @@ class CumulusLinuxSaveFlow(SaveConfigurationFlow):
         """
         with self._cli_handler.get_cli_service(self._cli_handler.root_mode) as cli_service:
             filesystem_actions = FileSystemActions(cli_service=cli_service, logger=self._logger)
-
-            # todo: replace this with temp directory ?
-            backup_dir = "BACKUP_{}".format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-            filesystem_actions.create_folder(name=backup_dir)
+            backup_dir = filesystem_actions.create_tmp_dir()
 
             for conf_folder in self.CONF_FOLDERS:
                 filesystem_actions.copy_folder(src_folder=conf_folder, dst_folder=backup_dir)
@@ -66,20 +58,6 @@ class CumulusLinuxSaveFlow(SaveConfigurationFlow):
                 filesystem_actions.copy_file(src_file=conf_file, dst_folder=backup_dir)
 
             backup_file = filesystem_actions.create_tmp_file()
-            filesystem_actions.compress_folder(compress_name=backup_file, folder=backup_dir)
-            filesystem_actions.remove_folder(name=backup_dir)
+            filesystem_actions.tar_compress_folder(compress_name=backup_file, folder=backup_dir)
 
-            filesystem_actions.chown_file(user_name=cli_service.session.username, file_name=backup_file)
-
-            if not isinstance(cli_service.session, SSHSession):
-                raise Exception("Unable to save configuration without CLI type 'SSH'")
-
-            tmp_file_path = tempfile.mktemp(prefix="cumulus_backup_", suffix=".tar")
-
-            scp = SCPClient(transport=cli_service.session._handler.get_transport())
-            scp.get(remote_path=backup_file, local_path=tmp_file_path)
-
-            print "*" * 100, tmp_file_path
-            # todo:
-            # step 2: upload backup file from CS server to remote host
-            # step 3: if "File System" - skip this step
+            filesystem_actions.curl_upload_file(file_path=backup_file, remote_url=folder_path)
