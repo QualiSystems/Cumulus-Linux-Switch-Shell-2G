@@ -300,36 +300,32 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         :return: SavedResults serialized as JSON
         :rtype: OrchestrationSaveResult
         """
+        logger = get_logger_with_thread_id(context)
+        logger.info("Orchestration save command started")
 
-        # See below an example implementation, here we use jsonpickle for serialization,
-        # to use this sample, you'll need to add jsonpickle to your requirements.txt file
-        # The JSON schema is defined at: https://github.com/QualiSystems/sandbox_orchestration_standard/blob/master/save%20%26%20restore/saved_artifact_info.schema.json
-        # You can find more information and examples examples in the spec document at https://github.com/QualiSystems/sandbox_orchestration_standard/blob/master/save%20%26%20restore/save%20%26%20restore%20standard.md
-        '''
-        # By convention, all dates should be UTC
-        created_date = datetime.datetime.utcnow()
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+            if not mode:
+                mode = 'shallow'
 
-        # This can be any unique identifier which can later be used to retrieve the artifact
-        # such as filepath etc.
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
 
-        # By convention, all dates should be UTC
-        created_date = datetime.datetime.utcnow()
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
 
-        # This can be any unique identifier which can later be used to retrieve the artifact
-        # such as filepath etc.
-        identifier = created_date.strftime('%y_%m_%d %H_%M_%S_%f')
+            configuration_operations = CumulusLinuxConfigurationRunner(cli_handler=cli_handler,
+                                                                       resource_config=resource_config,
+                                                                       api=api,
+                                                                       logger=logger)
 
-        orchestration_saved_artifact = OrchestrationSavedArtifact('REPLACE_WITH_ARTIFACT_TYPE', identifier)
+            response = configuration_operations.orchestration_save(mode=mode, custom_params=custom_params)
+            logger.info('Orchestration save command completed')
 
-        saved_artifacts_info = OrchestrationSavedArtifactInfo(
-            resource_name="some_resource",
-            created_date=created_date,
-            restore_rules=OrchestrationRestoreRules(requires_same_resource=True),
-            saved_artifact=orchestration_saved_artifact)
-
-        return OrchestrationSaveResult(saved_artifacts_info)
-        '''
-        pass
+            return response
 
     def orchestration_restore(self, context, cancellation_context, saved_artifact_info, custom_params):
         """Restores a saved artifact previously saved by this Shell driver using the orchestration_save function
@@ -340,27 +336,31 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
         :param str custom_params: Set of custom parameters for the restore operation
         :return: None
         """
-        '''
-        # The saved_details JSON will be defined according to the JSON Schema and is the same object returned via the
-        # orchestration save function.
-        # Example input:
-        # {
-        #     "saved_artifact": {
-        #      "artifact_type": "REPLACE_WITH_ARTIFACT_TYPE",
-        #      "identifier": "16_08_09 11_21_35_657000"
-        #     },
-        #     "resource_name": "some_resource",
-        #     "restore_rules": {
-        #      "requires_same_resource": true
-        #     },
-        #     "created_date": "2016-08-09T11:21:35.657000"
-        #    }
+        logger = get_logger_with_thread_id(context)
+        logger.info("Orchestration restore command started")
 
-        # The example code below just parses and prints the saved artifact identifier
-        saved_details_object = json.loads(saved_details)
-        return saved_details_object[u'saved_artifact'][u'identifier']
-        '''
-        pass
+        with ErrorHandlingContext(logger):
+            api = get_api(context)
+
+            resource_config = create_networking_resource_from_context(shell_name=self.SHELL_NAME,
+                                                                      supported_os=self.SUPPORTED_OS,
+                                                                      context=context)
+
+            cli_handler = CumulusCliHandler(cli=self._cli,
+                                            resource_config=resource_config,
+                                            logger=logger,
+                                            api=api)
+
+            configuration_operations = CumulusLinuxConfigurationRunner(cli_handler=cli_handler,
+                                                                       resource_config=resource_config,
+                                                                       api=api,
+                                                                       logger=logger)
+
+            configuration_operations.orchestration_restore(saved_artifact_info=saved_artifact_info,
+                                                           custom_params=custom_params)
+
+            logger.info('Orchestration restore command completed')
+
 
     def health_check(self, context):
         """Performs device health check
