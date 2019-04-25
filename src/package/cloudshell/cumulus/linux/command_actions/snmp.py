@@ -1,3 +1,5 @@
+import re
+
 from cloudshell.cli.command_template.command_template_executor import CommandTemplateExecutor
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
 
@@ -65,6 +67,18 @@ class BaseSnmpActions(object):
                                        command_template=enable_disable_snmp.REMOVE_VIEW,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(view_name=view_name)
+
+    def is_snmp_running(self, action_map=None, error_map=None):
+        """
+
+        :return:
+        """
+        snmp_status = CommandTemplateExecutor(cli_service=self._cli_service,
+                                              command_template=enable_disable_snmp.SHOW_SNMP_STATUS,
+                                              action_map=action_map,
+                                              error_map=error_map).execute_command()
+
+        return bool(re.search(r"status[\s]+active", snmp_status, re.MULTILINE))
 
 
 class SnmpV2Actions(BaseSnmpActions):

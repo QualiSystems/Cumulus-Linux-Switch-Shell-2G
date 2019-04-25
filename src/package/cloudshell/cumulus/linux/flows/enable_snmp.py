@@ -1,3 +1,7 @@
+from datetime import datetime
+from datetime import timedelta
+import time
+
 from cloudshell.cli.session.session_exceptions import CommandExecutionException
 from cloudshell.devices.flows.cli_action_flows import EnableSnmpFlow
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
@@ -9,6 +13,9 @@ from package.cloudshell.cumulus.linux.command_actions.snmp import SnmpV3Actions
 
 
 class CumulusLinuxEnableSnmpFlow(EnableSnmpFlow):
+    SNMP_WAITING_TIMEOUT = 5 * 60
+    SNMP_WAITING_INTERVAL = 5
+
     def execute_flow(self, snmp_parameters):
         """
 
@@ -22,6 +29,20 @@ class CumulusLinuxEnableSnmpFlow(EnableSnmpFlow):
                 enable_snmp = self._enable_snmp_v2
 
             enable_snmp(cli_service=cli_service, snmp_parameters=snmp_parameters)
+
+    def _wait_for_snmp_service(self, snmp_actions):
+        """
+
+        :param package.cloudshell.cumulus.linux.command_actions.snmp.BaseSnmpActions snmp_actions:
+        :return:
+        """
+        timeout_time = datetime.now() + timedelta(seconds=self.SNMP_WAITING_TIMEOUT)
+
+        while not snmp_actions.is_snmp_running():
+            if datetime.now() > timeout_time:
+                raise Exception("SNMP Service didn't started after 'Enable SNMP' command")
+
+            time.sleep(self.SNMP_WAITING_INTERVAL)
 
     def _enable_snmp_v2(self, cli_service, snmp_parameters):
         """
@@ -51,6 +72,7 @@ class CumulusLinuxEnableSnmpFlow(EnableSnmpFlow):
             commit_actions.abort()
             raise
 
+        self._wait_for_snmp_service(snmp_actions=snmp_v2_actions)
         return output
 
     def _enable_snmp_v3(self, cli_service, snmp_parameters):
@@ -77,4 +99,5 @@ class CumulusLinuxEnableSnmpFlow(EnableSnmpFlow):
             self._logger.exception("Failed to Enable SNMPv3 on the device:")
             raise
 
+        self._wait_for_snmp_service(snmp_actions=snmp_v3_actions)
         return output

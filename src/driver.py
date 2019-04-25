@@ -481,10 +481,10 @@ if __name__ == "__main__":
 
 
                             # SNMP v2 Read-only
-                            ("SNMP Version", "2"),
-                            ("Enable SNMP", "True"),
-                            ("Disable SNMP", "True"),
-                            ("SNMP Read Community", "mynotsosecretpassword"),
+                            # ("SNMP Version", "2"),
+                            # ("Enable SNMP", "True"),
+                            # ("Disable SNMP", "True"),
+                            # ("SNMP Read Community", "mynotsosecretpassword"),
                             # End SNMP v2 Read-only
 
                             # SNMP v2 Read-Write
@@ -495,7 +495,7 @@ if __name__ == "__main__":
                             # End SNMP v2 Read-Write
 
                             # SNMP v3
-                            # ("SNMP Version", "3"),
+                            ("SNMP Version", "3"),
                             ("Enable SNMP", "True"),
                             ("Disable SNMP", "True"),
                             ("SNMP V3 User", "quali"),
@@ -652,7 +652,7 @@ if __name__ == "__main__":
     dr = get_driver(context)
 
     # get inventory
-    # print get_inventory(driver=dr, context=context)
+    print get_inventory(driver=dr, context=context)
 
     # # health check
     # print health_check(driver=dr, context=context)
@@ -685,12 +685,12 @@ if __name__ == "__main__":
     #            configuration_type="shalk",
     #            vrf_management_name="")
     #
-    print restore(driver=dr,
-                  context=context,
-                  path="ftp://test_user:test_password@192.168.42.102/Cumulus_Linux_Switch-running-240419-180106",
-                  configuration_type="running",
-                  restore_method="override",
-                  vrf_management_name="")
+    # print restore(driver=dr,
+    #               context=context,
+    #               path="ftp://test_user:test_password@192.168.42.102/Cumulus_Linux_Switch-running-240419-180106",
+    #               configuration_type="running",
+    #               restore_method="override",
+    #               vrf_management_name="")
 
 
 
