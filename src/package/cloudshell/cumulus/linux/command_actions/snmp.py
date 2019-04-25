@@ -78,7 +78,7 @@ class BaseSnmpActions(object):
                                               action_map=action_map,
                                               error_map=error_map).execute_command()
 
-        return bool(re.search(r"status[\s]+active", snmp_status, re.MULTILINE))
+        return bool(re.search(r"current[\s]+status[\s]+active", snmp_status, flags=re.IGNORECASE | re.MULTILINE))
 
 
 class SnmpV2Actions(BaseSnmpActions):

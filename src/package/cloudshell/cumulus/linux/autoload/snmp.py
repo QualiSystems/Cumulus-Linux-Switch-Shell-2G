@@ -139,13 +139,11 @@ class CumulusLinuxSNMPAutoload(object):
         :return: device model
         :rtype: str
         """
+        matched = re.search(r"cumulus[\s]+linux[\s]+(?P<os_version>[^\s,]+)",
+                            self.snmp_handler.get_property('SNMPv2-MIB', 'sysDescr', '0'),
+                            flags=re.IGNORECASE)
 
-        result = ""
-        matched = re.search(r"Version (?P<os_version>[^\s,]+)",
-                            self.snmp_handler.get_property('SNMPv2-MIB', 'sysDescr', '0'))
-        if matched:
-            result = matched.groupdict().get("os_version", "")
-        return result
+        return matched.group("os_version") if matched else ""
 
     def _get_device_details(self):
         """Get root element attributes """
