@@ -148,7 +148,7 @@ class SnmpV3Actions(BaseSnmpActions):
             raise Exception("Authentication protocol {} is not supported".format(snmp_auth_proto))
 
         try:
-            priv_command_template = self.PRIV_COMMAND_MAP.get(snmp_priv_proto)
+            priv_command_template = self.PRIV_COMMAND_MAP[snmp_priv_proto]
         except KeyError:
             raise Exception("Privacy Protocol {} is not supported".format(snmp_priv_proto))
 
