@@ -2,7 +2,7 @@ from cloudshell.cli.session.session_exceptions import CommandExecutionException
 from cloudshell.devices.flows.cli_action_flows import LoadFirmwareFlow
 
 from package.cloudshell.cumulus.linux.command_actions.commit import CommitActions
-from package.cloudshell.cumulus.linux.command_actions.filesystem import FileSystemActions
+from package.cloudshell.cumulus.linux.command_actions.filesystem import SystemActions
 
 
 class CumulusLinuxLoadFirmwareFlow(LoadFirmwareFlow):
@@ -15,7 +15,7 @@ class CumulusLinuxLoadFirmwareFlow(LoadFirmwareFlow):
         :return:
         """
         with self._cli_handler.get_cli_service(self._cli_handler.root_mode) as cli_service:
-            filesystem_actions = FileSystemActions(cli_service=cli_service, logger=self._logger)
+            system_actions = SystemActions(cli_service=cli_service, logger=self._logger)
             commit_actions = CommitActions(cli_service=cli_service, logger=self._logger)
 
             # todo: backup and copy back directories if something went wrong during the upgrade

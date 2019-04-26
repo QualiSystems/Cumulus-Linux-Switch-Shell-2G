@@ -1,6 +1,6 @@
 from cloudshell.devices.flows.cli_action_flows import SaveConfigurationFlow
 
-from package.cloudshell.cumulus.linux.command_actions.filesystem import FileSystemActions
+from package.cloudshell.cumulus.linux.command_actions.filesystem import SystemActions
 
 
 class CumulusLinuxSaveFlow(SaveConfigurationFlow):
@@ -48,16 +48,16 @@ class CumulusLinuxSaveFlow(SaveConfigurationFlow):
         :return:
         """
         with self._cli_handler.get_cli_service(self._cli_handler.root_mode) as cli_service:
-            filesystem_actions = FileSystemActions(cli_service=cli_service, logger=self._logger)
-            backup_dir = filesystem_actions.create_tmp_dir()
+            system_actions = SystemActions(cli_service=cli_service, logger=self._logger)
+            backup_dir = system_actions.create_tmp_dir()
 
             for conf_folder in self.CONF_FOLDERS:
-                filesystem_actions.copy_folder(src_folder=conf_folder, dst_folder=backup_dir)
+                system_actions.copy_folder(src_folder=conf_folder, dst_folder=backup_dir)
 
             for conf_file in self.CONF_FILES:
-                filesystem_actions.copy_file(src_file=conf_file, dst_folder=backup_dir)
+                system_actions.copy_file(src_file=conf_file, dst_folder=backup_dir)
 
-            backup_file = filesystem_actions.create_tmp_file()
-            filesystem_actions.tar_compress_folder(compress_name=backup_file, folder=backup_dir)
+            backup_file = system_actions.create_tmp_file()
+            system_actions.tar_compress_folder(compress_name=backup_file, folder=backup_dir)
 
-            filesystem_actions.curl_upload_file(file_path=backup_file, remote_url=folder_path)
+            system_actions.curl_upload_file(file_path=backup_file, remote_url=folder_path)

@@ -3,7 +3,7 @@ from cloudshell.cli.command_template.command_template_executor import CommandTem
 from package.cloudshell.cumulus.linux.command_templates import filesystem
 
 
-class FileSystemActions(object):
+class SystemActions(object):
     def __init__(self, cli_service, logger):
         """
 
