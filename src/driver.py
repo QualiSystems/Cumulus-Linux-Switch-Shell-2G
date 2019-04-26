@@ -14,6 +14,7 @@ from package.cloudshell.cumulus.linux.snmp.handler import CumulusLinuxSnmpHandle
 
 # from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
 from package.cloudshell.cumulus.linux.runners.configuration import CumulusLinuxConfigurationRunner
+from package.cloudshell.cumulus.linux.runners.firmware import CumulusLinuxFirmwareRunner
 
 
 class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
@@ -68,9 +69,8 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                                              resource_config=resource_config,
                                                              snmp_handler=snmp_handler)
 
-            logger.info('Autoload started')
             response = autoload_operations.discover()
-            logger.info('Autoload completed')
+            logger.info('Autoload command completed')
 
             return response
 
@@ -169,6 +169,7 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
 
             return response
 
+    @GlobalLock.lock
     def load_firmware(self, context, cancellation_context, path, vrf_management_name):
         """Upload and updates firmware on the resource
 
@@ -190,6 +191,13 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                             resource_config=resource_config,
                                             logger=logger,
                                             api=api)
+
+            if not vrf_management_name:
+                vrf_management_name = resource_config.vrf_management_name
+
+            firmware_operations = CumulusLinuxFirmwareRunner(cli_handler=cli_handler, logger=logger)
+            response = firmware_operations.load_firmware(path=path, vrf_management_name=vrf_management_name)
+            logger.info('Finish Load Firmware: {}'.format(response))
 
     def run_custom_command(self, context, cancellation_context, custom_command):
         """Executes a custom command on the device
@@ -282,7 +290,6 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                                        api=api,
                                                        resource_config=resource_config,cli_handler=cli_handler)
 
-
             result = state_operations.shutdown()
             logger.info('Shutdown command ended with result: {}'.format(result))
 
@@ -360,7 +367,6 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
                                                            custom_params=custom_params)
 
             logger.info('Orchestration restore command completed')
-
 
     def health_check(self, context):
         """Performs device health check
@@ -604,6 +610,20 @@ if __name__ == "__main__":
                               configuration_type=configuration_type,
                               restore_method=restore_method,
                               vrf_management_name=vrf_management_name)
+
+    def load_firmware(driver, context, path, vrf_management_name=""):
+        """
+
+        :param driver:
+        :param context:
+        :param path:
+        :param vrf_management_name:
+        :return:
+        """
+        return driver.load_firmware(context=context,
+                                    cancellation_context=None,
+                                    path=path,
+                                    vrf_management_name=vrf_management_name)
 
     def apply_connectivity_changes(driver, context, action="setVlan"):
         """
