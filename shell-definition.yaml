@@ -10,7 +10,7 @@ description: >
  This Shell supports devices that run Cumulus Linux operating system
 
 imports:
-  - cloudshell_standard: cloudshell_networking_standard_5_0_3.yaml
+  - cloudshell_standard: cloudshell_networking_standard_5_0_4.yaml
 
 node_types:
 

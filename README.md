@@ -31,7 +31,7 @@ CloudShell's networking shells provide L2 or L3 connectivity between resources a
 For more information on the device, see the vendor's official product documentation.
 
 ### Standard version
-**Cumulus Linux Switch 2G Shell** is based on the Networking Shell Standard version **5.0.3**.
+**Cumulus Linux Switch 2G Shell** is based on the Networking Shell Standard version **5.0.4**.
 
 For detailed information about the shell’s structure and attributes, see the [Networking Shell Standard](https://github.com/QualiSystems/cloudshell-standards/blob/master/Documentation/networking_standard.md) in GitHub.
 
@@ -39,7 +39,7 @@ For detailed information about the shell’s structure and attributes, see the [
 
 Release: **Cumulus Linux Switch 2G Shell**
 
-▪ CloudShell version: 8.2 GA Patch 3, 8.3 GA, 9.0 and above
+▪ CloudShell version: 8.2 GA Patch 4, 8.3 GA Patch 2, 9.0 and above
 
 ▪ Cumulus Linux: 3.7 and above
 
