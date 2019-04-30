@@ -39,9 +39,9 @@ For detailed information about the shell’s structure and attributes, see the [
 
 Release: **Cumulus Linux Switch 2G Shell**
 
-▪ CloudShell version **8.2** and above
+▪ CloudShell version: 8.2 GA Patch 3, 8.3 GA, 9.0 and above
 
-▪ Cumulus Linux **3.7** and above
+▪ Cumulus Linux: 3.7 and above
 
 **Note:** If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support. 
 
