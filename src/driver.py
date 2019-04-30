@@ -1,20 +1,17 @@
 from cloudshell.core.context.error_handling_context import ErrorHandlingContext
+from cloudshell.cumulus.linux.cli.handler import CumulusCliHandler
+from cloudshell.cumulus.linux.runners.autoload import CumulusLinuxAutoloadRunner
+from cloudshell.cumulus.linux.runners.connectivity import CumulusLinuxConnectivityRunner
+from cloudshell.cumulus.linux.runners.state import CumulusLinuxStateRunner
+from cloudshell.cumulus.linux.runners.configuration import CumulusLinuxConfigurationRunner
+from cloudshell.cumulus.linux.runners.firmware import CumulusLinuxFirmwareRunner
+from cloudshell.cumulus.linux.snmp.handler import CumulusLinuxSnmpHandler
 from cloudshell.devices.driver_helper import get_logger_with_thread_id, get_cli, get_api, parse_custom_commands
 from cloudshell.devices.standards.networking.configuration_attributes_structure import \
     create_networking_resource_from_context
 from cloudshell.shell.core.driver_utils import GlobalLock
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.devices.runners.run_command_runner import RunCommandRunner
-
-from package.cloudshell.cumulus.linux.cli.handler import CumulusCliHandler
-from package.cloudshell.cumulus.linux.runners.autoload import CumulusLinuxAutoloadRunner
-from package.cloudshell.cumulus.linux.runners.connectivity import CumulusLinuxConnectivityRunner
-from package.cloudshell.cumulus.linux.runners.state import CumulusLinuxStateRunner
-from package.cloudshell.cumulus.linux.snmp.handler import CumulusLinuxSnmpHandler
-
-# from cloudshell.networking.networking_resource_driver_interface import NetworkingResourceDriverInterface
-from package.cloudshell.cumulus.linux.runners.configuration import CumulusLinuxConfigurationRunner
-from package.cloudshell.cumulus.linux.runners.firmware import CumulusLinuxFirmwareRunner
 
 
 class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
