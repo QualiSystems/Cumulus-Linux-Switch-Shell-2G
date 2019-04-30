@@ -13,10 +13,11 @@ class FirmwareActions(object):
         self._cli_service = cli_service
         self._logger = logger
 
-    def load_firmware(self, image_path, action_map=None, error_map=None):
+    def load_firmware(self, image_path, timeout, action_map=None, error_map=None):
         """
 
         :param image_path:
+        :param timeout:
         :param action_map:
         :param error_map:
         :return:
@@ -24,4 +25,5 @@ class FirmwareActions(object):
         return CommandTemplateExecutor(cli_service=self._cli_service,
                                        command_template=firmware.LOAD_FIRMWARE,
                                        action_map=action_map,
+                                       timeout=timeout,
                                        error_map=error_map).execute_command(image_path=image_path)

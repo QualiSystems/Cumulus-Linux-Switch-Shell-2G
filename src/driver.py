@@ -197,6 +197,7 @@ class CumulusLinuxSwitchShell2GDriver(ResourceDriverInterface, GlobalLock):
 
             firmware_operations = CumulusLinuxFirmwareRunner(cli_handler=cli_handler, logger=logger)
             response = firmware_operations.load_firmware(path=path, vrf_management_name=vrf_management_name)
+
             logger.info('Finish Load Firmware: {}'.format(response))
 
     def run_custom_command(self, context, cancellation_context, custom_command):
@@ -672,7 +673,7 @@ if __name__ == "__main__":
     dr = get_driver(context)
 
     # get inventory
-    print get_inventory(driver=dr, context=context)
+    # print get_inventory(driver=dr, context=context)
 
     # # health check
     # print health_check(driver=dr, context=context)
@@ -711,9 +712,10 @@ if __name__ == "__main__":
     #               configuration_type="running",
     #               restore_method="override",
     #               vrf_management_name="")
-
-
-
+    #
+    print load_firmware(driver=dr,
+                        context=context,
+                        path="ftp://test_user:test_password@192.168.42.102/Cumulus_Linux_Switch-running-240419-180106")
 
     # # run apply connectivity changes | set VLAN
     # print apply_connectivity_changes(driver=dr, context=context, action="setVlan")
