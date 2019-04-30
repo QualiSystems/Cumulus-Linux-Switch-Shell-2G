@@ -37,13 +37,11 @@ For detailed information about the shell’s structure and attributes, see the [
 
 ### Requirements
 
-Release: **Cumuluslinuxswitchshell2G**
+Release: **Cumulus Linux Switch 2G Shell**
 
-▪ CloudShell version **8.2**
+▪ CloudShell version **8.2** and above
 
-▪ Other
-
-[Include this note only if the shell is a 2G shell]
+▪ Cumulus Linux **3.7** and above
 
 **Note:** If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support. 
 
@@ -260,8 +258,8 @@ To connect with Quali users and experts from around the world, ask questions and
 For release updates, see the shell's [GitHub releases page](https://github.com/QualiSystems/Cumulus-Linux-Switch-Shell-2G/releases).
 
 # Knowing Issues
-    - SNMP Write Community is not supported
-    - Q-in-Q VLAN is not supported
+- SNMP Write Community is not supported
+- Q-in-Q VLAN is not supported
 
 [1]: https://github.com/QualiSystems/shellfoundry-tosca-networking-template/blob/master/cloudshell_logo.png
 [2]: https://github.com/QualiSystems/shellfoundry-tosca-networking-template/blob/master/create_a_resource_device.png
