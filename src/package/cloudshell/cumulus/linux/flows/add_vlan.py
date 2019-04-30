@@ -35,13 +35,13 @@ class CumulusLinuxAddVlanFlow(AddVlanFlow):
             try:
                 if qnq:
                     raise Exception("Shell doesn't support QinQ")
-                else:
-                    output = vlan_actions.add_port_to_bridge(port=port)
 
-                    if port_mode == "trunk":
-                        output += vlan_actions.allow_trunk_vlans_on_port(port=port, vlan_range=vlan_range)
-                    else:
-                        output += vlan_actions.add_access_vlan_to_port(port=port, vlan=vlan_range)
+                output = vlan_actions.add_port_to_bridge(port=port)
+
+                if port_mode == "trunk":
+                    output += vlan_actions.allow_trunk_vlans_on_port(port=port, vlan_range=vlan_range)
+                else:
+                    output += vlan_actions.add_access_vlan_to_port(port=port, vlan=vlan_range)
 
                 output += commit_actions.commit()
 

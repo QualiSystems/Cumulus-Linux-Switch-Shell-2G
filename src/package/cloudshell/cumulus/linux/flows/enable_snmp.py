@@ -42,6 +42,7 @@ class CumulusLinuxEnableSnmpFlow(EnableSnmpFlow):
             if datetime.now() > timeout_time:
                 raise Exception("SNMP Service didn't started after 'Enable SNMP' command")
 
+            self._logger.info("Waiting for SNMP service to start...")
             time.sleep(self.SNMP_WAITING_INTERVAL)
 
     def _enable_snmp_v2(self, cli_service, snmp_parameters):

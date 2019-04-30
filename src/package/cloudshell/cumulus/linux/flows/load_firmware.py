@@ -17,12 +17,15 @@ class CumulusLinuxLoadFirmwareFlow(LoadFirmwareFlow):
             system_actions = SystemActions(cli_service=cli_service, logger=self._logger)
             firmware_actions = FirmwareActions(cli_service=cli_service, logger=self._logger)
 
+            self._logger.info("Loading firmware: {}".format(path))
             output = firmware_actions.load_firmware(image_path=path, timeout=timeout)
 
             try:
+                self._logger.info("Rebooting device...")
                 output += system_actions.reboot()
             except Exception:
                 self._logger.debug("Reboot session exception:", exc_info=True)
 
+            self._logger.info("Reconnecting session...")
             cli_service.reconnect(timeout)
             return output
