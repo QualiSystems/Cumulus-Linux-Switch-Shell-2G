@@ -1,8 +1,8 @@
 ![Image][1]
 
-# **Cumuluslinuxswitchshell2G**  
+# **Cumulus Linux Switch 2G Shell**
 
-Release date: March 2019
+Release date: April 2019
 
 `Shell version: 1.0.0`
 
@@ -25,13 +25,13 @@ A shell integrates a device model, application or other technology with CloudShe
 ### Networking Shells
 CloudShell's networking shells provide L2 or L3 connectivity between resources and/or Apps [remove "and/or Apps" if router].
 
-### **Cumuluslinuxswitchshell2G**
-**Cumuluslinuxswitchshell2G** shell provides you with connectivity and management capabilities such as device structure discovery and power management for the resource. 
+### **Cumulus Linux Switch 2G Shell**
+**Cumulus Linux Switch 2G** shell provides you with connectivity and management capabilities such as device structure discovery and power management for the resource.
 
 For more information on the device, see the vendor's official product documentation.
 
 ### Standard version
-**Cumuluslinuxswitchshell2G** is based on the Networking Shell Standard version **5.0.4**.
+**Cumulus Linux Switch 2G Shell** is based on the Networking Shell Standard version **5.0.3**.
 
 For detailed information about the shell’s structure and attributes, see the [Networking Shell Standard](https://github.com/QualiSystems/cloudshell-standards/blob/master/Documentation/networking_standard.md) in GitHub.
 
@@ -51,7 +51,7 @@ Release: **Cumuluslinuxswitchshell2G**
 
 The shell's data model includes all shell metadata, families, and attributes.
 
-#### **Cumuluslinuxswitchshell2G Attributes**
+#### **Cumulus Linux Switch 2G Shell Attributes**
 
 The attribute names and types are listed in the following section of the Networking Shell Standard:
 
@@ -63,36 +63,28 @@ The following table describes attributes that are unique to this shell and are n
 
 |Attribute Name|Data Type|Description|
 |:---|:---|:---|
-||||
-||||
-||||
-||||
+|CS_Switch|Cumulus Linux Switch 2G|Generic Cumulus Linux Switch 2 Generation|
+|CS_Chassis|Generic Chassis|Default Switch chassis|
+|CS_Module|Generic Module|Modules located on the chassis|
+|CS_SubModule|Generic Sub Module|Sub modules|
+|CS_Port|Port|Interface|
+|CS_PortChannel|Generic Port Channel|Group of interfaces|
+|CS_PowerPort|Generic Power Port|Power Supply module|
 
 ### Automation
 This section describes the automation (driver) associated with the data model. The shell’s driver is provided as part of the shell package. There are two types of automation processes, Autoload and Resource. Autoload is executed when creating the resource in the **Inventory** dashboard, while resource commands are run in the sandbox.
 
 The following commands are available on the resource:
 
-* 
-* 
-* 
-* 
-* 
+* Health Check
+* Run Custom Command
+* Save
+* Restore
+* Load Firmware
 
 For detailed information on each of the above commands, see the following section of the Networking Shell Standard:
 
 https://github.com/QualiSystems/cloudshell-standards/blob/master/Documentation/networking_standard.md#commands
-
-The following table describes commands that are unique to this shell and are not documented in the Shell Standard: 
-
-(Include additional information, as needed, to explain non-standard commands, i.e. differences between this shell's commands and the commands documented in the Shell Standard.)
-
-|Command|Description|
-|:---|:---|
-|||
-|||
-|||
-|||
 
 # Downloading the Shell
 The **Cumuluslinuxswitchshell2G** shell is available from the [Quali Community Integrations](https://community.quali.com/integrations) page. 
@@ -103,11 +95,11 @@ The shell comprises:
 
 |File name|Description|
 |:---|:---|
-|Cumuluslinuxswitchshell2G.zip|Device shell package|
-|Cumuluslinuxswitchshell2G_offline_dependencies.zip|Shell Python dependencies (for offline deployments only)|
+|Cumulus Linux Switch Shell 2G.zip|Device shell package|
+|cumulus_linux_offline_dependencies.zip|Shell Python dependencies (for offline deployments only)|
 
 # Importing and Configuring the Shell
-This section describes how to import the **Cumuluslinuxswitchshell2G** shell and configure and modify the shell’s devices.
+This section describes how to import the **Cumulus Linux Switch 2G** shell and configure and modify the shell’s devices.
 
 ### Importing the shell into CloudShell
 
@@ -178,7 +170,7 @@ You can also modify existing resources, see [Managing Resources in the Inventory
   1. In the CloudShell Portal, in the **Inventory** dashboard, click **Add New**. 
      ![Image][2]
      
-  2. From the list, select **Cumuluslinuxswitchshell2G**.
+  2. From the list, select **Cumulus Linux Switch 2G Shell**.
   
   3. Enter the **Name** and **IP address** of the device.
   
@@ -214,7 +206,7 @@ In online mode, the execution server automatically downloads and extracts the ap
 
 3. In the **Command Inputs** sub-pane, enter the following information:
 	* **Folder Path**: For example, *tftp://ipaddress/shared folder*.
-	* **Configuration Type**: **Startup** or **Running**.
+	* **Configuration Type**: **Startup** or **Running**. Note: only **Running** type option is available for this shell
 	* **VRF Management Name**: Provide the VRF Management name, if relevant.
 	
 4. Click **Run**.
@@ -228,21 +220,27 @@ The Startup or Running configuration is saved to a file named *<ResourceName>-<s
 
 3. In the **Command Inputs** sub-pane, enter the following information:
 	* **Path**: (Mandatory) Enter the full path of the configuration file. 
-	* **Restore Method**: (Optional) Possible values are **Override** or **Append**. If left empty, the **Override** method is used. 
-	* **Configuration Type**: (Mandatory) Possible values are **Startup** or **Running**.
+	* **Restore Method**: (Optional) Possible values are **Override** or **Append**. If left empty, the **Override** method is used. Note: only **Override** method is available for this shell
+	* **Configuration Type**: (Mandatory) Possible values are **Startup** or **Running**. Note: only **Running** type option is available for this shell
 	* **VRF Management Name**: (Optional) Provide the VRF Management name, if relevant.
 	
 4. Click **Run**.
 
-#### **Workflow 3** - *Load firmware* 
+#### **Workflow 3** - *Load firmware*
+
 1. In CloudShell portal, reserve the resource.
 
-2. Run the **Load Firmware** resource command. 
+2. Save current configuration using the **Save** resource command.
 
-3. In the **Command Inputs** sub-pane, enter the following information:
+3. Run the **Load Firmware** resource command.
+
+4. In the **Command Inputs** sub-pane, enter the following information:
 	* **Path** (Mandatory). Enter the full path to the firmware file on the remote host, for example: tftp://10.1.1.1/both.tim.
 	
-4. Click **Run**.
+5. Click **Run**.
+
+6. Restore configuration using the **Restore** resource command.
+
 
 # References
 To download and share integrations, see [Quali Community's Integrations](https://community.quali.com/integrations). 
@@ -259,13 +257,11 @@ To connect with Quali users and experts from around the world, ask questions and
 
 [Note]: Insert link to the release section of the shell GitHub repository to view changes made in each release. You should include a brief description of the fixes and enhancements made in this release.
 
-For release updates, see the shell's [GitHub releases page](https://github.com/QualiSystems/Cumuluslinuxswitchshell2G/releases).
+For release updates, see the shell's [GitHub releases page](https://github.com/QualiSystems/Cumulus-Linux-Switch-Shell-2G/releases).
 
-### Known Issues
-* 
-* 
-* 
-
+# Knowing Issues
+    - SNMP Write Community is not supported
+    - Q-in-Q VLAN is not supported
 
 [1]: https://github.com/QualiSystems/shellfoundry-tosca-networking-template/blob/master/cloudshell_logo.png
 [2]: https://github.com/QualiSystems/shellfoundry-tosca-networking-template/blob/master/create_a_resource_device.png

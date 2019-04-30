@@ -45,7 +45,7 @@ node_types:
             description: The password is required by some CLI protocols such as Telnet and is required according to the device configuration.
             type: cloudshell.datatypes.Password
           Enable Password:
-            description: The enable password is required by some CLI protocols such as Telnet and is required according to the device configuration.
+            description: UNIX root password.
             type: cloudshell.datatypes.Password
           Sessions Concurrency Limit:
             description: The maximum number of concurrent sessions that the driver will open to the device. Default is 1 (no concurrency).
