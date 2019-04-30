@@ -23,7 +23,7 @@ Release date: April 2019
 A shell integrates a device model, application or other technology with CloudShell. A shell consists of a data model that defines how the device and its properties are modeled in CloudShell, along with automation that enables interaction with the device via CloudShell.
 
 ### Networking Shells
-CloudShell's networking shells provide L2 or L3 connectivity between resources and/or Apps [remove "and/or Apps" if router].
+CloudShell's networking shells provide L2 or L3 connectivity between resources and/or Apps.
 
 ### **Cumulus Linux Switch 2G Shell**
 **Cumulus Linux Switch 2G** shell provides you with connectivity and management capabilities such as device structure discovery and power management for the resource.
@@ -252,9 +252,6 @@ To connect with Quali users and experts from around the world, ask questions and
 # Release Notes 
 
 ### What's New
-
-[Note]: Insert link to the release section of the shell GitHub repository to view changes made in each release. You should include a brief description of the fixes and enhancements made in this release.
-
 For release updates, see the shell's [GitHub releases page](https://github.com/QualiSystems/Cumulus-Linux-Switch-Shell-2G/releases).
 
 # Knowing Issues
