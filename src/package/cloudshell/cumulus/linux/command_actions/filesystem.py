@@ -153,3 +153,15 @@ class SystemActions(object):
                                        command_template=filesystem.RESTART_SERVICE,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(name=name)
+
+    def reboot(self, action_map=None, error_map=None):
+        """
+
+        :param action_map:
+        :param error_map:
+        :return:
+        """
+        return CommandTemplateExecutor(cli_service=self._cli_service,
+                                       command_template=filesystem.REBOOT,
+                                       action_map=action_map,
+                                       error_map=error_map).execute_command()

@@ -29,3 +29,5 @@ RESTART_SERVICE = CommandTemplate("service {name} restart", error_map=ERROR_MAP)
 CURL_UPLOAD_FILE = CommandTemplate("curl --insecure --upload-file {file_path} {remote_url}", error_map=CURL_ERROR_MAP)
 
 CURL_DOWNLOAD_FILE = CommandTemplate("curl --insecure {remote_url} -o {file_path}", error_map=CURL_ERROR_MAP)
+
+REBOOT = CommandTemplate("reboot", error_map=ERROR_MAP)
