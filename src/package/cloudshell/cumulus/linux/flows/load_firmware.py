@@ -1,7 +1,6 @@
 from cloudshell.devices.flows.cli_action_flows import LoadFirmwareFlow
 
-from package.cloudshell.cumulus.linux.command_actions.commit import CommitActions
-from package.cloudshell.cumulus.linux.command_actions.filesystem import SystemActions
+from package.cloudshell.cumulus.linux.command_actions.system import SystemActions
 from package.cloudshell.cumulus.linux.command_actions.firmware import FirmwareActions
 
 

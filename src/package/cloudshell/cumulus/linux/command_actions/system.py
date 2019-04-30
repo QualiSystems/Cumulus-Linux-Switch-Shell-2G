@@ -1,6 +1,6 @@
 from cloudshell.cli.command_template.command_template_executor import CommandTemplateExecutor
 
-from package.cloudshell.cumulus.linux.command_templates import filesystem
+from package.cloudshell.cumulus.linux.command_templates import system
 
 
 class SystemActions(object):
@@ -21,7 +21,7 @@ class SystemActions(object):
         :return:
         """
         tmp_file = CommandTemplateExecutor(cli_service=self._cli_service,
-                                           command_template=filesystem.CREATE_TEMP_FILE,
+                                           command_template=system.CREATE_TEMP_FILE,
                                            action_map=action_map,
                                            remove_prompt=True,
                                            error_map=error_map).execute_command()
@@ -36,7 +36,7 @@ class SystemActions(object):
         :return:
         """
         tmp_dir = CommandTemplateExecutor(cli_service=self._cli_service,
-                                          command_template=filesystem.CREATE_TEMP_DIR,
+                                          command_template=system.CREATE_TEMP_DIR,
                                           action_map=action_map,
                                           remove_prompt=True,
                                           error_map=error_map).execute_command()
@@ -53,7 +53,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.COPY_FOLDER,
+                                       command_template=system.COPY_FOLDER,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(src_folder=src_folder,
                                                                             dst_folder=dst_folder)
@@ -68,7 +68,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.COPY_FILE,
+                                       command_template=system.COPY_FILE,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(src_file=src_file, dst_folder=dst_folder)
 
@@ -82,7 +82,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.TAR_COMPRESS_FOLDER,
+                                       command_template=system.TAR_COMPRESS_FOLDER,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(compress_name=compress_name, folder=folder)
 
@@ -96,7 +96,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.TAR_UNCOMPRESS_FOLDER,
+                                       command_template=system.TAR_UNCOMPRESS_FOLDER,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(compressed_file=compressed_file,
                                                                             destination=destination)
@@ -111,7 +111,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.CURL_UPLOAD_FILE,
+                                       command_template=system.CURL_UPLOAD_FILE,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(file_path=file_path, remote_url=remote_url)
 
@@ -125,7 +125,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.CURL_DOWNLOAD_FILE,
+                                       command_template=system.CURL_DOWNLOAD_FILE,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(remote_url=remote_url, file_path=file_path)
 
@@ -137,7 +137,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.IF_RELOAD,
+                                       command_template=system.IF_RELOAD,
                                        action_map=action_map,
                                        error_map=error_map).execute_command()
 
@@ -150,7 +150,7 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.RESTART_SERVICE,
+                                       command_template=system.RESTART_SERVICE,
                                        action_map=action_map,
                                        error_map=error_map).execute_command(name=name)
 
@@ -162,6 +162,6 @@ class SystemActions(object):
         :return:
         """
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=filesystem.REBOOT,
+                                       command_template=system.REBOOT,
                                        action_map=action_map,
                                        error_map=error_map).execute_command()

@@ -1,6 +1,6 @@
 from cloudshell.devices.flows.cli_action_flows import RestoreConfigurationFlow
 
-from package.cloudshell.cumulus.linux.command_actions.filesystem import SystemActions
+from package.cloudshell.cumulus.linux.command_actions.system import SystemActions
 
 
 class CumulusLinuxRestoreFlow(RestoreConfigurationFlow):

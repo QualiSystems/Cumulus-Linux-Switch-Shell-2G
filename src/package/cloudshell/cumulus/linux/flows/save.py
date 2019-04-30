@@ -1,6 +1,6 @@
 from cloudshell.devices.flows.cli_action_flows import SaveConfigurationFlow
 
-from package.cloudshell.cumulus.linux.command_actions.filesystem import SystemActions
+from package.cloudshell.cumulus.linux.command_actions.system import SystemActions
 
 
 class CumulusLinuxSaveFlow(SaveConfigurationFlow):
