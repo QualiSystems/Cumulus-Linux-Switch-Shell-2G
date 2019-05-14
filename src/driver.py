@@ -450,8 +450,6 @@ if __name__ == "__main__":
         """
         """Return initialized driver instance"""
         address = '192.168.105.30'
-        # address = "adoc-lab.aa0.netvolante.jp"
-
         user = 'cumulus'
         password = 'CumulusLinux!'
         port = 443
