@@ -20,16 +20,19 @@ from cloudshell.shell.standards.networking.driver_interface import (
 from cloudshell.shell.standards.networking.resource_config import (
     NetworkingResourceConfig,
 )
+from cloudshell.snmp.snmp_configurator import EnableDisableSnmpConfigurator
 
 from cloudshell.cumulus.linux.cli.handler import CumulusCliConfigurator, get_cli
 from cloudshell.cumulus.linux.flows.autoload_flow import AutoloadFlow
 from cloudshell.cumulus.linux.flows.configuration_flow import ConfigurationFlow
 from cloudshell.cumulus.linux.flows.connectivity_flow import CumulusConnectivityFlow
+from cloudshell.cumulus.linux.flows.enable_disable_flow import (
+    EnableDisableFlowWithConfig,
+)
 from cloudshell.cumulus.linux.flows.load_firmware import LoadFirmwareFlow
 from cloudshell.cumulus.linux.flows.shutdown import (
     CumulusLinuxShutdownFlow as StateFlow,
 )
-from cloudshell.cumulus.linux.snmp.handler import CumulusEnableDisableSnmpConfigurator
 
 
 class CumulusLinuxSwitchShell2GDriver(
@@ -67,8 +70,11 @@ class CumulusLinuxSwitchShell2GDriver(
                 resource_config.shell_name,
                 resource_config.family_name,
             )
-            snmp_configurator = CumulusEnableDisableSnmpConfigurator(
-                resource_config, logger, cli_configurator
+            enable_disable_snmp_flow = EnableDisableFlowWithConfig(
+                cli_configurator, resource_config, logger
+            )
+            snmp_configurator = EnableDisableSnmpConfigurator(
+                enable_disable_snmp_flow, resource_config, logger
             )
             flow = AutoloadFlow(logger, snmp_configurator)
             response = flow.discover(self.SUPPORTED_OS, resource_model)
@@ -103,23 +109,9 @@ class CumulusLinuxSwitchShell2GDriver(
             cli_configurator = CumulusCliConfigurator(
                 self._cli, resource_config, logger
             )
-
-            if configuration_type.lower() == "startup":
-                raise Exception("Shell doesn't support 'Startup' configuration type")
-            if restore_method.lower() == "append":
-                raise Exception("Shell doesn't support 'Append' restore method")
-            configuration_type = "running"
-            restore_method = "override"
-
-            if not vrf_management_name:
-                vrf_management_name = resource_config.vrf_management_name
-
             flow = ConfigurationFlow(logger, resource_config, cli_configurator)
-            result = flow.restore(
-                path, configuration_type, restore_method, vrf_management_name
-            )
+            flow.restore(path, configuration_type, restore_method, vrf_management_name)
             logger.info("Restore command completed")
-            return result
 
     def save(
         self,
@@ -147,14 +139,6 @@ class CumulusLinuxSwitchShell2GDriver(
             cli_configurator = CumulusCliConfigurator(
                 self._cli, resource_config, logger
             )
-
-            if configuration_type.lower() == "startup":
-                raise Exception("Shell doesn't support 'Startup' configuration type")
-            configuration_type = "running"
-
-            if not vrf_management_name:
-                vrf_management_name = resource_config.vrf_management_name
-
             flow = ConfigurationFlow(logger, resource_config, cli_configurator)
             result = flow.save(folder_path, configuration_type, vrf_management_name)
             logger.info("Save command completed")
