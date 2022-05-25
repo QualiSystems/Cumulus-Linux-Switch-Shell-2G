@@ -26,7 +26,7 @@ from cloudshell.cumulus.linux.cli.handler import CumulusCliConfigurator, get_cli
 from cloudshell.cumulus.linux.flows.autoload_flow import AutoloadFlow
 from cloudshell.cumulus.linux.flows.configuration_flow import ConfigurationFlow
 from cloudshell.cumulus.linux.flows.connectivity_flow import CumulusConnectivityFlow
-from cloudshell.cumulus.linux.flows.enable_disable_flow import (
+from cloudshell.cumulus.linux.flows.enable_disable_snmp_flow import (
     EnableDisableFlowWithConfig,
 )
 from cloudshell.cumulus.linux.flows.load_firmware import LoadFirmwareFlow
